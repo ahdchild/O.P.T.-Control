@@ -22,6 +22,8 @@ int currentTime = millis();
 menu mainMenu ("Main Menu", 8, SCREEN_SIZE);
 bool controlMenu = true;
 
+menu testMenu[6];
+
 //Initialize 16x2 LCD
 const int rs = 8, en = 12, d4 = 0, d5 = 5, d6 = 9, d7 = 10;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);

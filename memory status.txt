@@ -1,0 +1,6 @@
+before optimization, 1 menu
+    358 bytes RAM
+    7.2kb Flash
+1 menu + 6 test menus
+    1.8KB RAM
+    7.4KB Flash
