@@ -14,7 +14,8 @@
 
 class menuitem {
     public:
-        menuitem(String name="Untitled", int minimum=0, int maximum=100, int itemType=NUMBER); //Constructor initializes a menuItem. I have to determine how to initialize textOptions[]
+        menuitem(String name="???", int minimum=0, int maximum=100, int defaultValue = 0); //Constructor initializes a NUMBER type menuItem.
+        menuitem(String name, String choices[], byte numberOfChoices); //Constructor initializes a STRING type menu item
         String printValue(); //returns textOptions[value] if type is string. Returns value if type is integer
         String printItem(); //returns label and printValue() formatted as a printable menu item
         void buttonDown(); //handler for down buttonpress
@@ -36,15 +37,16 @@ class menuitem {
     private:
         String label; //name of the menu item
         int value; //value of the menu item (or actionID if this is an action command type item)
-        int type; //Type of menu item. 0=integer, 1=string, 2=submenu, 3=action command
+        byte type; //Type of menu item. 0=integer, 1=string, 2=submenu, 3=action command
         int min; //minimum allowable value
         int max; //maximum allowable value
-        String textOptions[MAX_TEXT_OPTIONS]; //text for menu options. Length should match max. min should be set to 0 to correspond with 1st index
+        String *textOptions; //text for menu options. Length should match max. min should be set to 0 to correspond with 1st index
 };
 
 class menu {
     public:
-        menu(String name = "A Menu", int menuSize = MAX_MENU_ITEMS, int screenRows = 2);
+        menu();
+        menu(String name, menuitem itemList[], byte listSize, byte screenRows = 2);
         void buttonDown(); //handler for down buttonpress
         void buttonUp(); //handler for up button press
         void buttonOK(); //handler for ok or enter button press
@@ -55,12 +57,12 @@ class menu {
 
     private:
         String title;
-        int actionID; //identifier of action to be taken if action buttoin is pressed from this menu
-        int itemCount; //number of menu items on this menu. Remember to subtract 1 when counting from 0
-        int currentPage; //index of the first iten from items[] currently being displayed
-        int currentItem; //index of the currently selected item/line 
-        int linesPerPage; //how many lines will fit on a page. Determined by display being used
-        menuitem items[MAX_MENU_ITEMS]; //a list of menu items to show in this menu
+        byte actionID; //identifier of action to be taken if action buttoin is pressed from this menu
+        byte itemCount; //number of menu items on this menu. Remember to subtract 1 when counting from 0
+        byte currentPage; //index of the first iten from items[] currently being displayed
+        byte currentItem; //index of the currently selected item/line 
+        byte linesPerPage; //how many lines will fit on a page. Determined by display being used
+        menuitem *items; //a list of menu items to show in this menu
         menuitem nullItem; // for returning NULL
 };
 

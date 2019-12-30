@@ -5,6 +5,7 @@
 #include <LiquidCrystal.h>
 #include "ahd_camera.h"
 #include "ahd_menu.h"
+#include "mainmenu.h"
 
 //***Pin assignments
 const int FLASH = 4; // flash trigger
@@ -13,16 +14,13 @@ const int LIGHT = 3; // LED to light room
 const int BUTTON = 13; //Rotary button
 const int ROT_CLK = 2; //Rotary CLK pin
 const int ROT_DT = 1; //Rotary DT pin
-const int SCREEN_SIZE = 2; //how many rows the screen has
 
 volatile boolean TurnDetected = false;  // True if a rotary turn happened. Need volatile for Interrupts
 volatile int rotationDirection;  // 1 for right turn, -1 for left turn
 volatile int lastRotation = millis(); // last time a rotary turn happened for debouncing
-int currentTime = millis();
-menu mainMenu ("Main Menu", 8, SCREEN_SIZE);
-bool controlMenu = true;
 
-menu testMenu[6];
+int currentTime = millis();
+bool controlMenu = true;
 
 //Initialize 16x2 LCD
 const int rs = 8, en = 12, d4 = 0, d5 = 5, d6 = 9, d7 = 10;

@@ -1,6 +1,15 @@
-before optimization, 1 menu
-    358 bytes RAM
-    7.2kb Flash
-1 menu + 6 test menus
-    1.8KB RAM
-    7.4KB Flash
+before optimization
+    1 menu
+        358 bytes RAM
+        7.2KB Flash
+    1 menu + 6 test menus
+        1.8KB RAM
+        7.4KB Flash
+
+after getting rid of fixed string array in menuitem
+    1 menu
+        224 bytes RAM
+        6.8 KB Flash
+    1 menu + 6 test menus
+        928 bytes RAM
+        7KB Flash

@@ -6,33 +6,27 @@
 // CLASS - menuitem
 
 // Constructor initializes a menuItem. I have to determine how to initialize textOptions[]
-menuitem::menuitem(String name, int minimum, int maximum, int itemType)
+menuitem::menuitem(String name, int minimum, int maximum, int defaultValue)
     : label {name}
-    , value {minimum}
-    , type {itemType} 
+    , value {defaultValue}
+    , type {NUMBER} 
     , min {minimum}
     , max {maximum}
 {
-        //label = name; 
-        //type = itemType;
-        //min = minimum;
-        //value = min;
-        //max = maximum;
-
         if (max < min) max = min; //make sure max is not less than min. Throw an error instead when I figure out how
+        if (value < min) value = min; //fix value if it's out of range
+        if (value > max) value = max;
+}
 
-        if (type < 0 || type > 3) type = NUMBER; //if type is out of range, set it to the default - integer
-
-        //Extra setup if this is a string type
-        if (type == STRING) {
-            min = 0; // value for STRING menu items should start at 0
-            if (max > MAX_TEXT_OPTIONS - 1) max = MAX_TEXT_OPTIONS - 1;
-            value = 0;
-            //populate textOptions[]
-            for (int i = 0; i <= max; i++) {
-                textOptions[i] = String("??? " + String(i));
-            }
-        }
+//Constructor initializes a String type menu item
+menuitem::menuitem(String name, String choices[], byte numberOfChoices) 
+     : label {name}
+    , value {0}
+    , type {STRING} 
+    , min {0}
+    , max {numberOfChoices-1}
+{
+    textOptions = choices;
 }
 
 //returns textOptions[value] if type is string. Returns value if type is integer
@@ -169,29 +163,25 @@ String menuitem::getTextOption(int x) {
 
 // CLASS - menu
 
-menu::menu(String name, int menuSize, int screenRows) 
+menu::menu ()
+    : title {""}
+    , actionID {0}
+    , itemCount {0}
+    , currentPage {0}
+    , currentItem {0}
+    , linesPerPage {0}
+{
+}
+
+menu::menu(String name, menuitem itemList[],  byte listSize, byte screenRows) 
     : title {name}
     , actionID {0}
-    , itemCount {menuSize}
+    , itemCount {listSize}
     , currentPage {0}
     , currentItem {0}
     , linesPerPage {screenRows}
 {
-    //title = name;
-    //linesPerPage = screenRows;
-    
-    // Set item count and make sure it's in range
-    //itemCount = menuSize;
-    if(itemCount < 0) itemCount = 1;
-    if (itemCount > MAX_MENU_ITEMS) itemCount = MAX_MENU_ITEMS;
-    
-    for (int i = 0; i < MAX_MENU_ITEMS; i++) {
-        items[i].setLabel(String("Untitled " + String(i+1)));
-    }
-
-    //actionID = 0;
-    //currentPage = 0;
-    //currentItem = 0;
+    items = itemList;
 }
 
 //add an item to the menu
