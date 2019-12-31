@@ -63,7 +63,9 @@ void loop() {
   // handle button presses
   if (!digitalRead(BUTTON)) {
     delay(400);
-    controlMenu = !controlMenu;
+    if (currentMenu->item().getType() == SUBMENU) {
+      currentMenu->buttonOK();
+    } else controlMenu = !controlMenu;
     printScreen();
   }
 
@@ -71,11 +73,11 @@ void loop() {
   if (TurnDetected) {
     lcd.clear();
     if (rotationDirection == 1) {
-      if (!controlMenu) mainMenu.item().buttonUp();
-      else mainMenu.buttonDown();
+      if (!controlMenu) currentMenu->item().buttonUp();
+      else currentMenu->buttonDown();
     } else {
-      if (!controlMenu) mainMenu.item().buttonDown();
-      else mainMenu.buttonUp();
+      if (!controlMenu) currentMenu->item().buttonDown();
+      else currentMenu->buttonUp();
     }
     printScreen();
     TurnDetected = false;
@@ -85,11 +87,12 @@ void loop() {
 
 void printScreen() {
   lcd.clear();
+  currentMenu = &menuArray[currentMenu->currentMenu];
   for (int i = 1; i <= SCREEN_SIZE; i++) {
     lcd.setCursor(0,i-1);
-    lcd.print(mainMenu.printLine(i));
+    lcd.print(currentMenu->printLine(i));
     if (!controlMenu) {
-      lcd.setCursor(15,mainMenu.screenSelection());
+      lcd.setCursor(15,currentMenu->screenSelection());
       lcd.print("<");
     }
   }
@@ -129,6 +132,7 @@ void rotaryTurn() {
 }
 
 
+/*
 void test() {
   lcd.clear();
   lcd.print("Testing . . .");
@@ -151,4 +155,4 @@ void test() {
   lcd.print("Test Complete");
   lcd.setCursor(0, 1);
   lcd.print("Restart Now");
-}
+} */
