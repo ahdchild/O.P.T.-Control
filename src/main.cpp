@@ -1,13 +1,10 @@
-//  git test
-// edited online
-
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #include "ahd_camera.h"
 #include "ahd_menu.h"
 #include "mainmenu.h"
 
-//***Pin assignments
+//Pin assignments
 const int FLASH = 4; // flash trigger
 const int SHUTTER = 7; // camera shutter trigger
 const int LIGHT = 3; // LED to light room
@@ -15,23 +12,29 @@ const int BUTTON = 13; //Rotary button
 const int ROT_CLK = 2; //Rotary CLK pin
 const int ROT_DT = 1; //Rotary DT pin
 
+//Rotary encoder variables
 volatile boolean TurnDetected = false;  // True if a rotary turn happened. Need volatile for Interrupts
 volatile int rotationDirection;  // 1 for right turn, -1 for left turn
 volatile int lastRotation = millis(); // last time a rotary turn happened for debouncing
 
+//Timers
 int currentTime = millis();
-bool controlMenu = true;
+int timer1;
 
-//Initialize 16x2 LCD
+//16x2 LCD variables
 const int rs = 8, en = 12, d4 = 0, d5 = 5, d6 = 9, d7 = 10;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-//***Function Declarations
+//Additional variables
+bool controlMenu = true;
+
+//Function Declarations
 void simpleTrigger(int triggerPin=FLASH, int duration=50); //Trigger the flash or shutter
 void lockupTrigger(int lockupPin=SHUTTER, int triggerPin=FLASH, int triggerDuration=50, int lockupDelay=1000); //open the shutter, trigger the flash, close the shutter
 void rotaryTurn();
-void test();
-void printScreen();
+void refreshMenuScreen();
+void runAction(byte actionID);
+
 
 
 //***Setup
@@ -43,30 +46,35 @@ void setup() {
   pinMode(LIGHT, OUTPUT);
   pinMode(BUTTON, INPUT);
 
-  lcd.begin(16, 2); //Initialize 16x2 LCD
+  //pullup for the rotary button
+  digitalWrite(BUTTON, HIGH);
 
-  digitalWrite(BUTTON, HIGH); //pullup for the rotary button
-
-  attachInterrupt (0,rotaryTurn,FALLING); // interrupt 0 always connected to pin 2 on Arduino UNO
-
-  lcd.clear();
+  //Interrupt 0 connected to pin 2 on Arduino UNO
+  attachInterrupt (0, rotaryTurn, FALLING);
   
+  //Set runAction to handle actions from the menus
+  currentMenu->setActionHandler(runAction);
 
-  printScreen();
+  //Initialize 16x2 LCD
+  lcd.begin(16, 2); 
+  lcd.clear();
+  refreshMenuScreen();
 }
 
 
-//***Loop
+
+
+//Loop
 void loop() {
   currentTime = millis(); //for any timers
 
   // handle button presses
   if (!digitalRead(BUTTON)) {
     delay(400);
-    if (currentMenu->item().getType() == SUBMENU) {
+    if (currentMenu->item().getType() == SUBMENU || currentMenu->item().getType() == COMMAND) {
       currentMenu->buttonOK();
     } else controlMenu = !controlMenu;
-    printScreen();
+    refreshMenuScreen();
   }
 
   // handle rotary turns
@@ -79,18 +87,24 @@ void loop() {
       if (!controlMenu) currentMenu->item().buttonDown();
       else currentMenu->buttonUp();
     }
-    printScreen();
+    refreshMenuScreen();
     TurnDetected = false;
   }  
 }
 
 
-void printScreen() {
-  lcd.clear();
+//refreshMenuScreen()
+//reprints the menu on the lcd
+void refreshMenuScreen() {
+  //before printing, make sure currentMenu is correct  
   currentMenu = &menuArray[currentMenu->currentMenu];
+  
+  lcd.clear();
   for (int i = 1; i <= SCREEN_SIZE; i++) {
     lcd.setCursor(0,i-1);
     lcd.print(currentMenu->printLine(i));
+    //add an indicator if controlling an item value
+    //this can be removed when more buttons are added
     if (!controlMenu) {
       lcd.setCursor(15,currentMenu->screenSelection());
       lcd.print("<");
@@ -131,28 +145,10 @@ void rotaryTurn() {
   }
 }
 
-
-/*
-void test() {
+void runAction(byte actionID) {
   lcd.clear();
-  lcd.print("Testing . . .");
+  lcd.print("Running action ");
+  lcd.setCursor(0,1);
+  lcd.print(actionID);
   delay(2000);
-
-  //Testing the trigger functions`
-  lcd.clear();
-  lcd.print("Trigger Shutter");
-  delay(1000);
-  simpleTrigger(SHUTTER, 2000);
-  lcd.clear();
-  lcd.print("Trigger Flash");
-  delay(1000);
-  simpleTrigger();
-  lcd.clear();
-  lcd.print("Lockup Mode");
-  delay(1000);
-  lockupTrigger();
-  lcd.clear();
-  lcd.print("Test Complete");
-  lcd.setCursor(0, 1);
-  lcd.print("Restart Now");
-} */
+}

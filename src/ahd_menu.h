@@ -16,7 +16,7 @@ class menuitem {
     public:
         menuitem(const String &name="???", int minimum=0, int maximum=100, int defaultValue = 0); //Constructor initializes a NUMBER type menuItem.
         menuitem(const String &name, String choices[], byte numberOfChoices); //Constructor initializes a STRING type menu item
-        menuitem(byte targetIndex, const String &targetName); //Constructor initializes a SUBMENU type menu item
+        menuitem(byte targetIndex, const String &targetName, bool action = false); //Constructor initializes a SUBMENU type menu item
         String printValue(); //returns textOptions[value] if type is string. Returns value if type is integer
         String printItem(); //returns label and printValue() formatted as a printable menu item
         void buttonDown(); //handler for down buttonpress
@@ -45,6 +45,8 @@ class menuitem {
 };
 
 class menu {
+
+
     public:
         menu(); //default constructor should not be called
         menu(const String &name, menuitem itemList[], byte listSize, byte index, byte screenRows = 2);
@@ -56,6 +58,7 @@ class menu {
         String printLine(int x); //returns line to be printed on lcd row x. Use with lcd.print()
         menuitem& item(int x =-1); // allows direct access to the menuitem at index x. if x unset, returns currently selected item
         static byte currentMenu; // index of active menu
+        static void setActionHandler(void newFunc(byte));
 
     private:
         String title;
@@ -66,7 +69,10 @@ class menu {
         byte linesPerPage; //how many lines will fit on a page. Determined by display being used
         menuitem *items; //a list of menu items to show in this menu
         menuitem nullItem; // for returning NULL
-        byte menuIndex; 
+        byte menuIndex;  
+        
+        typedef void (*FUNC_PTR)(byte actionCode); 
+        static FUNC_PTR actionHandler;
 };
 
 

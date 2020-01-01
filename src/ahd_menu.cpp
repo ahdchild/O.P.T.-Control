@@ -29,11 +29,11 @@ menuitem::menuitem(const String &name, String choices[], byte numberOfChoices)
     , max {numberOfChoices-1}
     , textOptions {choices}
 {
-    //textOptions = choices;
+
 }
 
  //Constructor initializes a SUBMENU type menu item
- menuitem::menuitem(byte targetIndex, const String &targetName)
+ menuitem::menuitem(byte targetIndex, const String &targetName, bool action)
      : label {targetName}
     , value {targetIndex}
     , type {SUBMENU} 
@@ -41,7 +41,7 @@ menuitem::menuitem(const String &name, String choices[], byte numberOfChoices)
     , max {targetIndex}
     , textOptions {nullptr}
  {
-
+     if (action) type = COMMAND;
  }
 
 //returns textOptions[value] if type is string. Returns value if type is integer
@@ -53,11 +53,11 @@ String menuitem::printValue() {
 
 //returns label and printValue() formatted as a printable menu item
 String menuitem::printItem() {
-    String returnString;
+    String returnString = label;
     if (type == NUMBER || type == STRING) {
-        returnString = String(label + ": ");
+        returnString = String(returnString + ": ");
         returnString = String(returnString + printValue());
-    } else if (type == SUBMENU)returnString = String(label+" ->");
+    } else if (type == SUBMENU)returnString = String(returnString +" ->");
 
     return returnString;
 
@@ -189,6 +189,7 @@ String menuitem::getTextOption(int x) {
 // CLASS - menu
 
 byte menu::currentMenu = 0;
+menu::FUNC_PTR menu::actionHandler = NULL;
 
 menu::menu ()
     : title {""}
@@ -262,10 +263,22 @@ menuitem& menu::item(int x) {
     return nullItem;
 }
 
+//
+void menu::setActionHandler(void newFunc(byte)) {
+    actionHandler = newFunc;
+//    actionHandler(1);
+    
+}
+
 void menu::buttonOK() {
     // if the current item is a SUBMENU type, change currentMenu to index the menu to switch to
-    if (item().getType() == SUBMENU) {
+
+    if (item().getType() == SUBMENU) {    
         currentMenu = item().getValue();
         if (menuIndex > 0) currentItem = currentPage = 0; //Leave currentItem where it is when leaving the main menu, otherwise reset it
+    }
+
+    if (item().getType() == COMMAND && actionHandler != NULL) {
+        actionHandler(item().getValue());
     }
 }
