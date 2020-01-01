@@ -11,9 +11,8 @@ String distanceChoices[] = {"Laser", "Sound"};
 const byte MainMenuIndex = 0;
 
 //Distance Trigger menu
-const byte DistanceMenuSize = 6;
 const byte DistanceMenuIndex = 1;
-menuitem DistanceMenuItems[DistanceMenuSize] = {
+menuitem DistanceMenuItems[] = {
     menuitem("Use", distanceChoices, 2),
     menuitem("Dist"), 
     menuitem("When", rangeChoices, 3),
@@ -21,22 +20,23 @@ menuitem DistanceMenuItems[DistanceMenuSize] = {
     menuitem("Measure"),
     menuitem(0, "Main Menu")
 };
+const byte DistanceMenuSize = sizeof(DistanceMenuItems)/sizeof(menuitem);
 
 //Sound Trigger menu
-const byte SoundMenuSize = 3;
 const byte SoundMenuIndex = 2;
-menuitem SoundMenuItems[SoundMenuSize] = {
+menuitem SoundMenuItems[] = {
     menuitem("Thrshld"),
     menuitem("Get Thrshld"),
     menuitem(MainMenuIndex, "Main Menu")
 };
+const byte SoundMenuSize = sizeof(SoundMenuItems)/sizeof(menuitem);
 
 //Main menu
-const byte MainMenuSize = 2;
-menuitem MainMenuItems[MainMenuSize] = {
+menuitem MainMenuItems[] = {
     menuitem(DistanceMenuIndex, "Dist Trig"),
     menuitem(SoundMenuIndex, "Sound Trig")
 };
+const byte MainMenuSize = sizeof(MainMenuItems)/sizeof(menuitem);
 
 
 //Menu Array
