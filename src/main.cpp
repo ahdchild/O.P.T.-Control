@@ -1,5 +1,8 @@
 #include <Arduino.h>
-#include <LiquidCrystal.h>
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+
+
 #include "ahd_camera.h"
 #include "ahd_menu.h"
 #include "mainmenu.h"
@@ -8,25 +11,21 @@
 const int FLASH = 4; // flash trigger
 const int SHUTTER = 7; // camera shutter trigger
 const int LIGHT = 3; // LED to light room
-const int BUTTON = 13; //Rotary button
-const int ROT_CLK = 2; //Rotary CLK pin
-const int ROT_DT = 1; //Rotary DT pin
+const int JOYSTICK_X = 0;
+const int JOYSTICK_Y = 1;
+const int JOYSTICK_BUTTON = 13;
 
-//Rotary encoder variables
-volatile boolean TurnDetected = false;  // True if a rotary turn happened. Need volatile for Interrupts
-volatile int rotationDirection;  // 1 for right turn, -1 for left turn
-volatile int lastRotation = millis(); // last time a rotary turn happened for debouncing
+int joystickXCenter, joystickYCenter;
 
 //Timers
-int currentTime = millis();
 int timer1;
 
 //16x2 LCD variables
-const int rs = 8, en = 12, d4 = 0, d5 = 5, d6 = 9, d7 = 10;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 //Additional variables
 bool controlMenu = true;
+bool wasCentered = true;
 
 //Function Declarations
 void simpleTrigger(int triggerPin=FLASH, int duration=50); //Trigger the flash or shutter
@@ -39,26 +38,32 @@ void runAction(byte actionID);
 
 //***Setup
 void setup() {
-  
+
   //Pin Modes
   pinMode(FLASH, OUTPUT);
   pinMode(SHUTTER, OUTPUT);
   pinMode(LIGHT, OUTPUT);
-  pinMode(BUTTON, INPUT);
+  pinMode(JOYSTICK_BUTTON, INPUT);
+  digitalWrite(JOYSTICK_BUTTON, HIGH);
 
-  //pullup for the rotary button
-  digitalWrite(BUTTON, HIGH);
+  //Calibrate Joystick
+  joystickXCenter = analogRead(JOYSTICK_X);
+  joystickYCenter = analogRead(JOYSTICK_Y);
 
-  //Interrupt 0 connected to pin 2 on Arduino UNO
-  attachInterrupt (0, rotaryTurn, FALLING);
-  
   //Set runAction to handle actions from the menus
   currentMenu->setActionHandler(runAction);
-
+  
   //Initialize 16x2 LCD
-  lcd.begin(16, 2); 
+  lcd.init();
+  lcd.backlight();
+ 
   lcd.clear();
+
+  //Display menu
   refreshMenuScreen();
+   lcd.print("test"); 
+
+ 
 }
 
 
@@ -66,21 +71,25 @@ void setup() {
 
 //Loop
 void loop() {
-  currentTime = millis(); //for any timers
+// int currentTime = millis(); //for any timers
 
+  
   // handle button presses
-  if (!digitalRead(BUTTON)) {
+  if (!digitalRead(JOYSTICK_BUTTON)) {
     delay(400);
-    if (currentMenu->item().getType() == SUBMENU || currentMenu->item().getType() == COMMAND) {
+    if (currentMenu->item().getType() == MENU_SUBMENU || currentMenu->item().getType() == MENU_COMMAND) {
       currentMenu->buttonOK();
     } else controlMenu = !controlMenu;
     refreshMenuScreen();
   }
 
-  // handle rotary turns
-  if (TurnDetected) {
-    lcd.clear();
-    if (rotationDirection == 1) {
+
+   // handle rotary turns
+  int joyYInput = analogRead(JOYSTICK_Y) - joystickYCenter;
+  int joyXInput = analogRead(JOYSTICK_X) - joystickXCenter;
+  if (abs(joyYInput) > 100 && wasCentered) {
+    wasCentered = false;
+    if (joyYInput < 0) {
       if (!controlMenu) currentMenu->item().buttonUp();
       else currentMenu->buttonDown();
     } else {
@@ -88,8 +97,19 @@ void loop() {
       else currentMenu->buttonUp();
     }
     refreshMenuScreen();
-    TurnDetected = false;
-  }  
+  } /* else if (abs(joyXInput) > 100 && wasCentered) {
+    if (joyXInput > 0) {
+      if (!controlMenu) currentMenu->item().buttonUp();
+      else currentMenu->buttonDown();
+    } else {
+      if (!controlMenu) currentMenu->item().buttonDown();
+      else currentMenu->buttonUp();
+    }
+    wasCentered = false;
+    refreshMenuScreen();
+  } */ 
+
+  if (abs(joyYInput) < 10) wasCentered = true;
 }
 
 
@@ -103,6 +123,7 @@ void refreshMenuScreen() {
   for (int i = 1; i <= SCREEN_SIZE; i++) {
     lcd.setCursor(0,i-1);
     lcd.print(currentMenu->printLine(i));
+
     //add an indicator if controlling an item value
     //this can be removed when more buttons are added
     if (!controlMenu) {
@@ -130,20 +151,6 @@ void lockupTrigger(int lockupPin, int triggerPin, int triggerDuration, int locku
     digitalWrite(lockupPin, LOW);
 }
 
-
-void rotaryTurn() {
-  //If ROT_DT and ROT_CLK are both high or both low, it's spinning forward. If they're different, it's going backward.
-  if (digitalRead(ROT_DT) == digitalRead(ROT_CLK)) {
-    rotationDirection = 1;  
-  } else rotationDirection = -1;
-
-
-  //Debounce - throw away changes within 100 miliseconds
-  if (currentTime - lastRotation > 100) {
-    TurnDetected = true;
-    lastRotation = currentTime;
-  }
-}
 
 void runAction(byte actionID) {
   lcd.clear();
