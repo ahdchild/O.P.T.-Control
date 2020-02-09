@@ -10,4 +10,5 @@ Upon completion, it will have the following features:
 * **Intervalometer**
 * **Room light** - For shots that require dark settings, O.P.T. control has a high power LED to illuminate the work area that will automatically trun off during the shot.
 
+## Schematic
 ![Schematic](OPT%20Control%20Schematic.png)
