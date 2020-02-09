@@ -5,10 +5,16 @@ void setup() {
     initializeStuff();
 
     // run tests
-    testSetup();
+    //testSetup();
 }
 
 
 void loop() {
-    testLoop();
+    // testLoop();
+
+    // handle button presses
+    handleButton();
+
+    // reprint the screen if needed
+    PrintScreen();
 }

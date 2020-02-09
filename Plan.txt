@@ -12,3 +12,20 @@ DoAction() Do action related to current menu item.
 SetMenu(byte whichMenu) change the current menu. Check against totalMenus. Update currentMenuSize
 SetItem(byte whichItem) change the currentItem. Update currentItemMax and currentitemMin
 PrintScreen() clear the screen. Print each line starting from currentPage
+
+
+
+Buttons layout:
+
+Menu up
+Menu down
+
+item up
+item down
+
+enter
+
+measure
+
+shoot
+cancel

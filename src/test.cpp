@@ -16,19 +16,7 @@ int soundHigh = 0;
 
 void testLoop() 
 {
-    if (PCFInterruptFlag) {
-        if (!buttonController.read(7)) flash();
-        if (!buttonController.read(0)) soundHigh = 0;
-        if (!buttonController.read(6)) shutterOpen();
-            else shutterClose();
-        if (!buttonController.read(1)) {
-            digitalWrite(WATERDROP, HIGH);
-            delay(20);
-            digitalWrite(WATERDROP, LOW);
-        }
-        
-        PCFInterruptFlag = false;
-    }
+
 
     unsigned int distance = laserDistance.read();
     // if (distance > 450 && distance < 600) flash();

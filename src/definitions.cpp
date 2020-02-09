@@ -5,11 +5,14 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 PCF857x buttonController(0x20, &Wire);
 byte temperature = 0;
 byte humidity = 0;
+byte buttonState = B11111111;
+byte mode = STANDBY_MODE;
 
 
 volatile bool PCFInterruptFlag = false;
-
 VL53L1X laserDistance;
+long lastDebounceTime[] = {0,0,0,0,0,0,0,0};
+const long debounceDelay = 10;
 
 // Non Extern Variables
 SimpleDHT11 tempSensor(TEMPERATURE);
@@ -40,7 +43,6 @@ void initializeStuff() {
     buttonController.resetInterruptPin();
     attachInterrupt(digitalPinToInterrupt(BUTTON_INTERRUPT), PCFInterrupt, FALLING);
     // Wire.setClock(100000L);
-    
 
     //initialize laser distance
     //Wire.setClock(400000);
@@ -54,8 +56,6 @@ void initializeStuff() {
     laserDistance.setDistanceMode(VL53L1X::Long);
     laserDistance.setMeasurementTimingBudget(50000);
     laserDistance.startContinuous(50);
-
-
 
     // Initialize variables
     getTemp();
@@ -115,9 +115,10 @@ double getUSDistance(bool accurate) {
     // Read the echoPin, pulseIn() returns the duration (length of the pulse) in microseconds:
     duration = pulseIn(US_ECHO, HIGH);
     
-    //Make speed of sound more accurate
+    // Use current temperature tyo calculate more accuarate speed of sound
     if (accurate) {
         unsigned int currentTime = millis();
+        // update temp if it hasn't been updated recently
         if (currentTime-lastTempUpdate>TempUpdateFreq) {
             getTemp();
             lastTempUpdate = currentTime;
@@ -150,4 +151,66 @@ String padInt(int number, int spaces) {
     }
 
     return result;
+}
+
+void handleButton() {
+    // do nothing if interrupt has not been triggered
+    if (!PCFInterruptFlag) return;
+
+    PCFInterruptFlag = false;
+    bool timePassed[8];
+
+    byte newButtonState = buttonController.read8();
+
+    // Check each button for debounce delay.
+    // timePassed[i] is set true if the debounbce time has passed
+    for (int i = 0; i < 8; i++) {
+        timePassed[i] = ((millis() - lastDebounceTime[i]) > debounceDelay);
+        if (timePassed[i]) lastDebounceTime[i] = millis();
+    }
+
+    // do things with the buttons. When debounce matters, checkstatus of timePassed[i] first
+    if (timePassed[BT_UP]) {
+        // if it's pressed but wasn't before
+        if (!bitRead(newButtonState, BT_UP) && bitRead(buttonState, BT_UP)) {
+            buttonMenuDown();
+        }
+    }
+    
+    if (timePassed[BT_DOWN]) {
+        // if it's pressed but wasn't before
+        if (!bitRead(newButtonState, BT_DOWN) && bitRead(buttonState, BT_DOWN)) {
+            buttonMenuUp();
+        }
+    }
+
+    if (timePassed[BT_RIGHT]) {
+        // if it's pressed but wasn't before
+        if (!bitRead(newButtonState, BT_RIGHT) && bitRead(buttonState, BT_RIGHT)) {
+            buttonItemLeft();
+        }
+    }
+
+    if (timePassed[BT_LEFT]) {
+        // if it's pressed but wasn't before
+        if (!bitRead(newButtonState, BT_LEFT) && bitRead(buttonState, BT_LEFT)) {
+            buttonItemRight();
+        }
+    }
+
+    if (timePassed[BT_CANCEL]) {
+        // if it's pressed but wasn't before
+        if (!bitRead(newButtonState, BT_CANCEL) && bitRead(buttonState, BT_CANCEL)) {
+            buttonCancel();
+        }
+    }
+
+
+    buttonState = newButtonState; 
+}
+
+// Shorten a string
+String shortenString(String text, byte length) {
+    text.remove(length);
+    return text;
 }
