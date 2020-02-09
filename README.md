@@ -9,3 +9,5 @@ Upon completion, it will have the following features:
 * **Lightning Photography** - Using a light sensor. This one is very experimental until some testing can be completed
 * **Intervalometer**
 * **Room light** - For shots that require dark settings, O.P.T. control has a high power LED to illuminate the work area that will automatically trun off during the shot.
+
+![Schematic](OPT%20Control%20Schematic.png)
