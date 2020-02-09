@@ -1,5 +1,5 @@
 # O.P.T. Control
-**O**verkill **P**hotography **T**rigger Control is an multi function camera and flash controller. The hardware 
+**O**verkill **P**hotography **T**rigger Control is an multi function camera and flash controller. The hardware is based on an Arduino and commonly available components. This is not yet functional. Build information will be available upon completion
 
 Upon completion, it will have the following features:
 * **Waterdrop Photography** - Control a 12v solenoid along with an external flash and camera shutter for timed waterdrop shots
