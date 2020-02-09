@@ -160,7 +160,7 @@ void menuItem(int whichItem, int action) {
             currentValue = decodeItemValue(distanceSettings[DM_WHEN], RANGE_CHART);
             break;
         case 3:
-            currentName = "Range for =: ";
+            currentName = "+/- Range: ";
             currentMin = 1;
             currentMax = 100;
             currentValue = distanceSettings[DM_RANGE];
@@ -186,7 +186,7 @@ String decodeItemValue(int value, byte lookupChart) {
             conversionChart = new String[3]{"Flash", "Shutter", "Lockup"};
             break;
         case RANGE_CHART:
-            conversionChart = new String[3]{"Dist > x", "Dist < x", "Dist = x"};
+            conversionChart = new String[4]{"Dist > x", "Dist < x", "Dist = x", "Change"};
             break;
         case SENSOR_CHART:
             conversionChart = new String[2] {"Laser", "Sound"};
