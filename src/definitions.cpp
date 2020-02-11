@@ -47,7 +47,6 @@ void initializeStuff() {
     //initialize laser distance
     //Wire.setClock(400000);
     laserDistance.setTimeout(500);
-    //laserDistance.init();
     if (!laserDistance.init())
     {
         lcd.print("Failed to detect and initialize sensor!");
@@ -59,6 +58,7 @@ void initializeStuff() {
 
     // Initialize variables
     getTemp();
+    defaultSettings();
 }
 
 // Handle button interrupts
@@ -155,7 +155,14 @@ String padInt(int number, int spaces) {
 
 void handleButton() {
     // do nothing if interrupt has not been triggered
-    if (!PCFInterruptFlag) return;
+    if (!PCFInterruptFlag) {
+        if (!bitRead(buttonState, BT_LEFT)) {
+            buttonItemLeft(true);
+        } else if (!bitRead(buttonState, BT_RIGHT)) {
+            buttonItemRight(true);
+        }
+        return;
+    }
 
     PCFInterruptFlag = false;
     bool timePassed[8];
@@ -185,16 +192,16 @@ void handleButton() {
     }
 
     if (timePassed[BT_RIGHT]) {
-        // if it's pressed but wasn't before
+        // if pressed but wasn't before
         if (!bitRead(newButtonState, BT_RIGHT) && bitRead(buttonState, BT_RIGHT)) {
-            buttonItemLeft();
+            buttonItemRight();
         }
     }
 
     if (timePassed[BT_LEFT]) {
         // if it's pressed but wasn't before
         if (!bitRead(newButtonState, BT_LEFT) && bitRead(buttonState, BT_LEFT)) {
-            buttonItemRight();
+            buttonItemLeft();
         }
     }
 

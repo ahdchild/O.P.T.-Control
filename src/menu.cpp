@@ -11,14 +11,25 @@ String currentValue;
 int currentMin;
 int currentMax;
 byte menuLength = 6;
+double buttonHoldStart;
+double buttonHoldLastAction;
 
 // Distance settings array
-int distanceSettings[] = {
-    USE_LASER, // default sensor
-    100, // default distance
-    AROUND, // default trigger condition
-    10 // default range
-};
+int distanceSettings[DIST_MENU_SIZE];
+
+// Sound settings array
+int soundSettings[SO_MENU_SIZE];
+
+void defaultSettings() {
+    distanceSettings[DM_SENSOR] = USE_LASER;
+    distanceSettings[DM_DISTANCE] = 100;
+    distanceSettings[DM_WHEN] = AROUND;
+    distanceSettings[DM_RANGE] = 10;
+    distanceSettings[DM_DELAY] = 0;
+
+    soundSettings[SO_THRESHOLD] = 140;
+    soundSettings[SO_DELAY] = 0;
+}
 
 String menuName() {
     String theName;
@@ -53,56 +64,41 @@ String menuName() {
     return theName;
 }
 
-// clear the screen. Print each line starting from currentPage
-void PrintScreen() {
-    // do nothing if no reprint is needed
-    if (!screenReprintNeeded) return;
+void changeCurrentMenu(int whichMenu) {
+    int menuSizes[lastMenu+2]; //offset by 2 because 6 menu uitems are numbered -1 through 5
+
+    // offset menu index by 1 to account for main menu at -1
+    menuSizes[1+MainMenu] = lastMenu + 1; 
+    menuSizes[1+DistanceMenu] = DIST_MENU_SIZE; 
+    menuSizes[1+SoundMenu] = SO_MENU_SIZE; 
+    menuSizes[1+WaterMenu] = 1; 
+    menuSizes[1+LightningMenu] = 1; 
+    menuSizes[1+IntervalometerMenu] = 1; 
+    menuSizes[1+SettingsMenu] = 1; 
     
-    screenReprintNeeded = false;
+    // check to see if whichMenu is in bounds before changing
+    if (whichMenu >= MainMenu && whichMenu <= lastMenu) {
+        // if changing to the main menu, let current item be the menu we're leaving
+        if (whichMenu == MainMenu && currentMenu > MainMenu){
+            currentItem = currentMenu;
+            currentPage = currentMenu;
+            // make sure screen is not scrolled down past the end
+            if (lastMenu-itemsPerPage < currentPage) currentPage = (lastMenu-itemsPerPage)+1;
+        } else {
+            currentItem = 0; 
+            currentPage = 0;
+        }
+        currentMenu = whichMenu;
+        menuLength = menuSizes[whichMenu+1]; // Add 1 since main menu is -1
 
-    byte lineLength; 
-    byte i;
-    String lineToPrint;
-
-    lcd.home();
-
-    // print top line of menu
-    lineToPrint = "** " + menuName();
-    lineToPrint = lineToPrint + " ";
-    lineLength = lcd.print(shortenString(lineToPrint));
-    // fill the rest of the line with space
-    for (i=lineLength; i < 20; i++) lcd.print("*");
-
-    // print the next 3 lines
-    for (int j=1; j<4; j++){
-        lcd.setCursor(0,j);
-        lineToPrint = PrintMenuLine(j-1);
-        lineLength = lcd.print(shortenString(lineToPrint));
-        // fill the rest of the line with space
-        for (i=lineLength; i < 20; i++) lcd.print(" ");
+        screenReprintNeeded = true;
     }
-
-    lcd.setCursor(cursorPosition, (currentItem-currentPage) + 1);
-    lcd.blink();
-    
 }
-
- // Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
-String PrintMenuLine(byte screenLine) {
-    String theLine;
-    int whichItem = currentPage + screenLine;
-    
-    menuItem(whichItem);
-    if (whichItem == currentItem) cursorPosition = currentName.length() - 1;
-    if (cursorPosition > 19) cursorPosition = 19;
-    theLine = currentName + currentValue;
-
-    return theLine;
-}
-
 
 void menuItem(int whichItem, int action) {
     //to do - make sure whichItem is not outside the menu count
+    
+    if (action != 0) screenReprintNeeded = true;
     
     //Main Menu
     if (currentMenu == MainMenu) {
@@ -141,36 +137,69 @@ void menuItem(int whichItem, int action) {
     if (currentMenu == DistanceMenu) {
         switch (whichItem)
         {
-        case 0:
+        case DM_SENSOR:
             currentName = "Sensor: ";
             currentMin = 0;
             currentMax = 1;
-            currentValue = decodeItemValue(distanceSettings[DM_SENSOR], SENSOR_CHART);
+            if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
+            currentValue = decodeItemValue(distanceSettings[whichItem], SENSOR_CHART);
             break;
-        case 1:
+        case DM_DISTANCE:
             currentName = "Distance: ";
             currentMin = 1;
             currentMax = 400;
-            currentValue = distanceSettings[DM_DISTANCE];
+            if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
+            currentValue = distanceSettings[whichItem];
             break;
-        case 2:
+        case DM_WHEN:
             currentName = "When: ";
             currentMin = 0;
             currentMax = 3;
-            currentValue = decodeItemValue(distanceSettings[DM_WHEN], RANGE_CHART);
+            if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
+            currentValue = decodeItemValue(distanceSettings[whichItem], RANGE_CHART);
             break;
-        case 3:
+        case DM_RANGE:
             currentName = "+/- Range: ";
             currentMin = 1;
             currentMax = 100;
-            currentValue = distanceSettings[DM_RANGE];
-            break;                            
+            if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
+            currentValue = distanceSettings[whichItem];
+            break;
+        case DM_DELAY:
+            currentName = "Delay: ";
+            currentMin = 0;
+            currentMax = 1000;
+            if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
+            currentValue = distanceSettings[whichItem];
+            break;                                         
         default:
             currentName = "Item Error";
             currentValue = "123";
             break;
         }
-    }   
+    }
+
+    //Sound Menu
+    if (currentMenu == SoundMenu) {
+        switch (whichItem)
+        {
+        case 0:
+            currentName = "Threshold: ";
+            currentMin = 0;
+            currentMax = 255;
+            currentValue = soundSettings[SO_THRESHOLD];
+            break;
+        case 1:
+            currentName = "Delay: ";
+            currentMin = 0;
+            currentMax = 1000;
+            currentValue = distanceSettings[SO_DELAY];
+            break;
+        default:
+            currentName = "";
+            currentValue = "";
+        }
+    }      
 }
 
 String decodeItemValue(int value, byte lookupChart) {
@@ -203,6 +232,53 @@ String decodeItemValue(int value, byte lookupChart) {
     return theText;
 }
 
+// Print each line starting from currentPage
+void PrintScreen() {
+    // do nothing if no reprint is needed
+    if (!screenReprintNeeded) return;
+    
+    screenReprintNeeded = false;
+
+    byte lineLength; 
+    byte i;
+    String lineToPrint;
+
+    lcd.home();
+
+    // print top line of menu
+    lineToPrint = "** " + menuName();
+    lineToPrint = lineToPrint + " ";
+    lineLength = lcd.print(shortenString(lineToPrint));
+    // fill the rest of the line with space
+    for (i=lineLength; i < 20; i++) lcd.print("*");
+
+    // print the next 3 lines
+    for (int j=1; j<4; j++){
+        lcd.setCursor(0,j);
+        lineToPrint = PrintMenuLine(j-1);
+        lineLength = lcd.print(shortenString(lineToPrint));
+        // fill the rest of the line with space
+        for (i=lineLength; i < 20; i++) lcd.print(" ");
+    }
+
+    lcd.setCursor(cursorPosition, (currentItem-currentPage) + 1);
+    lcd.blink();
+    
+}
+
+ // Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
+String PrintMenuLine(byte screenLine) {
+    String theLine;
+    int whichItem = currentPage + screenLine; // figure out which menu item is needed
+    
+    menuItem(whichItem); // update menu variable with values of the correct item
+    if (whichItem == currentItem) cursorPosition = currentName.length() - 1;
+    if (cursorPosition > 19) cursorPosition = 19;
+    theLine = currentName + currentValue;
+
+    return theLine;
+}
+
 void buttonMenuDown() {
     if (mode == STANDBY_MODE) {
         if (currentItem > 0) {
@@ -223,42 +299,49 @@ void buttonMenuUp() {
     }
 }
 
-void changeCurrentMenu(int whichMenu) {
-    int menuSizes[] = {
-        6, // MainMenu 
-        4, // DistanceMenu 
-        1, // SoundMenu 
-        1, // WaterMenu 
-        1, // LightningMenu 
-        1, // IntervalometerMenu 
-        1 // SettingsMenu 
-    };
-    if (whichMenu >= MainMenu && whichMenu <= lastMenu) {
-        if (whichMenu == MainMenu && currentMenu > MainMenu){
-            currentItem = currentMenu;
-            currentPage = currentMenu;
-            if (lastMenu-itemsPerPage < currentPage) currentPage = (lastMenu-itemsPerPage)+1;
+void buttonItemLeft(bool holdDown) {
+    if (mode == STANDBY_MODE) {
+        int changeAmt = -1;
+
+        if (holdDown) {
+            int timeHeld = millis() - buttonHoldStart;
+            int timeSince = millis() - buttonHoldLastAction;
+
+            if (timeHeld > BUTTON_HOLD_2) changeAmt *= CHANGE_AMT_2;
+                else if (timeHeld > BUTTON_HOLD_1) changeAmt *= CHANGE_AMT_1;
+            
+            if (timeSince < CHANGE_RATE) changeAmt = 0;
+                else buttonHoldLastAction = millis();
         } else {
-            currentItem = 0; 
-            currentPage = 0;
+            buttonHoldStart = buttonHoldLastAction = millis();
         }
-        currentMenu = whichMenu;
-        menuLength = menuSizes[whichMenu+1]; // Add 1 since main menu is -1
-
-        screenReprintNeeded = true;
+        if (changeAmt != 0) menuItem(currentItem, changeAmt);
     }
 }
 
-void buttonItemLeft() {
+void buttonItemRight(bool holdDown) {
     if (mode == STANDBY_MODE) {
-        menuItem(currentItem, -1);
-    }
-}
+        int changeAmt = 1;
 
-void buttonItemRight() {
-    if (mode == STANDBY_MODE) {
+        if (holdDown) {
+            int timeHeld = millis() - buttonHoldStart;
+            int timeSince = millis() - buttonHoldLastAction;
+
+            if (timeHeld > BUTTON_HOLD_2) changeAmt *= CHANGE_AMT_2;
+                else if (timeHeld > BUTTON_HOLD_1) changeAmt *= CHANGE_AMT_1;
+            
+            if (timeSince < CHANGE_RATE) changeAmt = 0;
+                else buttonHoldLastAction = millis();
+        } else {
+            buttonHoldStart = millis();
+            buttonHoldLastAction = millis();
+        }
+        if (changeAmt != 0) menuItem(currentItem, changeAmt);
+    }
+
+/*     if (mode == STANDBY_MODE) {
         menuItem(currentItem, 1);
-    }
+    } */
 }
 
 void buttonCancel() {
@@ -266,14 +349,10 @@ void buttonCancel() {
         changeCurrentMenu(MainMenu);
     }
 }
-/*
 
-void PrintMenu(byte whichItem, bool isActive); // Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
-void SetValue(int value); //Set value for a current menu item first check the value against currentItemMax and currentitemMin, then use switch case to set whichever global variable
-void DoAction(); //Do action related to current menu item.
-void SetMenu(byte whichMenu); //change the current menu. Check against totalMenus. Update currentMenuSize
-void SetItem(byte whichItem); // change the currentItem. Update currentItemMax and currentitemMin
+int limitValue(int value) {
+    if (value < currentMin) value = currentMin;
+    if (value > currentMax) value = currentMax;
 
-
-
-*/
+    return value;
+}

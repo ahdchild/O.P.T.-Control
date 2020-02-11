@@ -3,7 +3,7 @@
 
 #include "definitions.h"
 
-//menus
+//menu ID numbers
     const int MainMenu = -1;
     const byte DistanceMenu = 0;
     const byte SoundMenu = 1;
@@ -12,36 +12,8 @@
     const byte IntervalometerMenu = 4;
     const byte SettingsMenu = 5;
 
-//menu navigation & display variables
-    const byte lastMenu = SettingsMenu; // used to determine when we're at the end of the list
-    const byte itemsPerPage = 3;
-    extern int currentMenu;
-    extern byte currentItem;
-    extern byte currentPage; // first menuitem on the screen
-
-    
-    //the menu item being worked with
-    extern String currentName;
-    extern String currentValue;
-    extern int currentMin;
-    extern int currentMax;
-    
-
-extern bool screenReprintNeeded;
-
-//int currentItemMax;
-//int currentitemMin;
-//byte currentMenuSize;
-
 // Distance Menu
-    // values for which sensor is used
-    const byte USE_LASER = 0;
-    const byte USE_ULTRASONIC = 1;
-
-    // values for trigger condition
-    const byte GREATER_THAN = 0;
-    const byte LESS_THAN = 1;
-    const byte AROUND = 2;
+    const byte DIST_MENU_SIZE = 4;
 
     // Settings array
     extern int distanceSettings[];
@@ -51,6 +23,17 @@ extern bool screenReprintNeeded;
     const byte DM_DISTANCE = 1;
     const byte DM_WHEN = 2;
     const byte DM_RANGE = 3;
+    const byte DM_DELAY = 4;
+
+//Sound Menu
+    const byte SO_MENU_SIZE = 2;
+
+    // Settings array
+    extern int soundSettings[];
+
+    // index values for settings
+    const byte SO_THRESHOLD = 0;
+    const byte SO_DELAY = 1;
 
 
 // Lookup charts
@@ -59,28 +42,58 @@ extern bool screenReprintNeeded;
     const byte RANGE_CHART = 3;
     const byte SENSOR_CHART = 4;
     const byte INT_PRIORITY_CHART = 5;
+ 
+    // values for which distance sensor is used
+    const byte USE_LASER = 0;
+    const byte USE_ULTRASONIC = 1;
+
+    // values for distance trigger condition
+    const byte GREATER_THAN = 0;
+    const byte LESS_THAN = 1;
+    const byte AROUND = 2;
+
+//menu navigation & display variables
+    const byte lastMenu = SettingsMenu; // used to determine when we're at the end of the list
+    const byte itemsPerPage = 3;
+    extern int currentMenu;
+    extern byte currentItem;
+    extern byte currentPage; // first menuitem on the screen
+
+    
+    //the current menu item being worked with
+    extern String currentName;
+    extern String currentValue;
+    extern int currentMin;
+    extern int currentMax;
+    extern bool screenReprintNeeded;
+
+    //extern int currentItemMax;
+    //extern int currentitemMin;
+    //extern byte currentMenuSize;
+
+    const int BUTTON_HOLD_1 = 1000; // hold button to change by larger amoiunt
+    const int CHANGE_AMT_1 = 10;
+    const int BUTTON_HOLD_2 = 5000; // hold longer for even larger amount
+    const int CHANGE_AMT_2 = 100;
+    const int CHANGE_RATE = 500; // how often to jump when holding the button
 
 //Functions
+    void defaultSettings();
+
+    String menuName(int whichItem); // Retuirn text name of a menu
+    void menuItem(int whichItem, int action=0);
+    void changeCurrentMenu(int whichMenu);
+    String decodeItemValue(int value, byte lookupChart);
+
     void PrintScreen(); // clear the screen. Print each line starting from currentPage
     String PrintMenuLine(byte screenLine); // Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
-    String menuName(int whichItem);
 
     void buttonMenuDown();
     void buttonMenuUp();
-    void buttonItemLeft();
-    void buttonItemRight();
+    void buttonItemLeft(bool holdDown = false);
+    void buttonItemRight(bool holdDown = false);
     void buttonCancel();
-
-    void menuItem(int whichItem, int action=0);
-    String decodeItemValue(int value, byte lookupChart);
-    void changeCurrentMenu(int whichMenu);
-
-
-    void SetMenu(byte whichMenu); //change the current menu. Check against totalMenus. Update currentMenuSize
-    void SetItem(byte whichItem); // change the currentItem. Update currentItemMax and currentitemMin
-    void SetValue(int value); //Set value for a current menu item first check the value against currentItemMax and currentitemMin, then use switch case to set whichever global variable
-    void DoAction(); //Do action related to current menu item.
-
  
+    int limitValue(int value); // confine a vaule to currentMax and currentMin
 
 #endif
