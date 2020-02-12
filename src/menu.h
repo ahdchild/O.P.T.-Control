@@ -13,7 +13,7 @@
     const byte SettingsMenu = 5;
 
 // Distance Menu
-    const byte DIST_MENU_SIZE = 4;
+    const byte DIST_MENU_SIZE = 5;
 
     // Settings array
     extern int distanceSettings[];
@@ -25,7 +25,7 @@
     const byte DM_RANGE = 3;
     const byte DM_DELAY = 4;
 
-//Sound Menu
+// Sound Menu
     const byte SO_MENU_SIZE = 2;
 
     // Settings array
@@ -34,6 +34,22 @@
     // index values for settings
     const byte SO_THRESHOLD = 0;
     const byte SO_DELAY = 1;
+
+// Water Menu
+    const byte WR_MENU_SIZE = 8;
+
+    // Settings array
+    extern int waterSettings[];
+
+    // index values for settings
+    const byte WR_1_DROP_SIZE = 0;
+    const byte WR_1_FLASH_DELAY = 1;
+    const byte WR_2_DROP_SIZE = 2;
+    const byte WR_2_DROP_DELAY = 3;
+    const byte WR_2_FLASH_DELAY = 4;
+    const byte WR_3_DROP_SIZE = 5;
+    const byte WR_3_DROP_DELAY = 6;
+    const byte WR_3_FLASH_DELAY = 7;
 
 
 // Lookup charts
@@ -71,11 +87,11 @@
     //extern int currentitemMin;
     //extern byte currentMenuSize;
 
-    const int BUTTON_HOLD_1 = 1000; // hold button to change by larger amoiunt
+    const int BUTTON_HOLD_1 = 1600; // hold button to change by larger amoiunt
     const int CHANGE_AMT_1 = 10;
     const int BUTTON_HOLD_2 = 5000; // hold longer for even larger amount
-    const int CHANGE_AMT_2 = 100;
-    const int CHANGE_RATE = 500; // how often to jump when holding the button
+    const int CHANGE_AMT_2 = 70;
+    const int CHANGE_RATE = 400; // how often to jump when holding the button
 
 //Functions
     void defaultSettings();

@@ -1,31 +1,38 @@
-byte currentMenu
-byte totalMenus
-byte currentMenuSize
-byte currentItem
-int currentItemMax
-int currentitemMin
-byte currentPage – first menuitem on the screen
+Waterdrop Sequence:
+    Open Shutter
+    ---------
+    Drop 1 (open valve for "Drop 1 time")
+    Wait (flash delay 1)
+    Fire flash
+    ---------
+    Wait (drop 2 delay)
+    Drop 2 (open valve for "Drop 2 time")
+    Wait (flash delay 2)
+    Fire flash
+    ---------
+    Wait (drop 3 delay)
+    Drop 3 (open valve for "Drop 3 time")
+    Wait (flash delay 3)
+    Fire flash
+    ---------
+    Close shutter
 
-PrintMenu(byte whichItem, bool isActive) Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
-SetValue(int value) Set value for a current menu item first check the value against currentItemMax and currentitemMin, then use switch case to set whichever global variable
-DoAction() Do action related to current menu item.
-SetMenu(byte whichMenu) change the current menu. Check against totalMenus. Update currentMenuSize
-SetItem(byte whichItem) change the currentItem. Update currentItemMax and currentitemMin
-PrintScreen() clear the screen. Print each line starting from currentPage
+    Pressing measure while a drop time/size is selected will let out a test drop of that size
+
+
 
 
 
 Buttons layout:
-
-Menu up
-Menu down
-
-item up
-item down
-
-enter
-
-measure
-
-shoot
-cancel
+    Menu up
+    Menu down
+    ---------
+    item up
+    item down
+    ---------
+    enter
+    ---------
+    measure
+    ---------
+    shoot
+    cancel

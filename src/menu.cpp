@@ -20,6 +20,9 @@ int distanceSettings[DIST_MENU_SIZE];
 // Sound settings array
 int soundSettings[SO_MENU_SIZE];
 
+// Water settings array
+int waterSettings[WR_MENU_SIZE];
+
 void defaultSettings() {
     distanceSettings[DM_SENSOR] = USE_LASER;
     distanceSettings[DM_DISTANCE] = 100;
@@ -29,6 +32,15 @@ void defaultSettings() {
 
     soundSettings[SO_THRESHOLD] = 140;
     soundSettings[SO_DELAY] = 0;
+
+    waterSettings[WR_1_DROP_SIZE] = 10;
+    waterSettings[WR_1_FLASH_DELAY] = 10;
+    waterSettings[WR_2_DROP_DELAY] = 0;
+    waterSettings[WR_2_DROP_SIZE] = 0;
+    waterSettings[WR_2_FLASH_DELAY] = 0;
+    waterSettings[WR_3_DROP_DELAY] = 0;
+    waterSettings[WR_3_DROP_SIZE] = 0;
+    waterSettings[WR_3_FLASH_DELAY] = 0;
 }
 
 String menuName() {
@@ -71,7 +83,7 @@ void changeCurrentMenu(int whichMenu) {
     menuSizes[1+MainMenu] = lastMenu + 1; 
     menuSizes[1+DistanceMenu] = DIST_MENU_SIZE; 
     menuSizes[1+SoundMenu] = SO_MENU_SIZE; 
-    menuSizes[1+WaterMenu] = 1; 
+    menuSizes[1+WaterMenu] = WR_MENU_SIZE; 
     menuSizes[1+LightningMenu] = 1; 
     menuSizes[1+IntervalometerMenu] = 1; 
     menuSizes[1+SettingsMenu] = 1; 
@@ -131,6 +143,7 @@ void menuItem(int whichItem, int action) {
             currentValue = "333";
             break;
         }
+        return;
     }
 
     //Distance Menu
@@ -177,29 +190,124 @@ void menuItem(int whichItem, int action) {
             currentValue = "123";
             break;
         }
+        return;
     }
 
     //Sound Menu
     if (currentMenu == SoundMenu) {
         switch (whichItem)
         {
-        case 0:
+        case SO_THRESHOLD:
             currentName = "Threshold: ";
             currentMin = 0;
             currentMax = 255;
-            currentValue = soundSettings[SO_THRESHOLD];
+            if (action != 0) soundSettings[whichItem] = limitValue(soundSettings[whichItem] + action);
+            currentValue = soundSettings[whichItem];
             break;
-        case 1:
+        case SO_DELAY:
             currentName = "Delay: ";
             currentMin = 0;
             currentMax = 1000;
-            currentValue = distanceSettings[SO_DELAY];
+            if (action != 0) soundSettings[whichItem] = limitValue(soundSettings[whichItem] + action);
+            currentValue = soundSettings[whichItem];
             break;
         default:
             currentName = "";
             currentValue = "";
         }
-    }      
+        return;
+    }
+
+    // Water Menu
+    if (currentMenu == WaterMenu) {
+        switch (whichItem)
+        {
+        case WR_1_DROP_SIZE:
+            currentName = "Drop 1 Size: ";
+            currentMin = 1;
+            currentMax = 500;
+            if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
+            currentValue = waterSettings[whichItem];
+            break;
+        case WR_1_FLASH_DELAY:
+            currentName = "Flash Delay 1: ";
+            currentMin = 0;
+            currentMax = 500;
+            if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
+            currentValue = waterSettings[whichItem];
+            break;
+        case WR_2_DROP_SIZE:
+            currentName = "Drop 2 Size: ";
+            currentMin = 0;
+            currentMax = 500;
+            if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
+            currentValue = waterSettings[whichItem];
+            if (waterSettings[WR_2_DROP_SIZE] == 0) {
+                for (int i = WR_2_DROP_SIZE; i < WR_MENU_SIZE; i++) waterSettings[i] = 0;
+            }
+            break;
+        case WR_2_DROP_DELAY:
+            currentName = "Drop 2 Delay: ";
+            currentMin = 0;
+            currentMax = 500;
+            if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
+            if (waterSettings[WR_2_DROP_SIZE] == 0) {
+                for (int i = WR_2_DROP_SIZE; i < WR_MENU_SIZE; i++) waterSettings[i] = 0;
+            }
+            currentValue = waterSettings[whichItem];
+            break;
+        case WR_2_FLASH_DELAY:
+            currentName = "Flash Delay 2: ";
+            currentMin = 0;
+            currentMax = 500;
+            if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
+            if (waterSettings[WR_2_DROP_SIZE] == 0) {
+                for (int i = WR_2_DROP_SIZE; i < WR_MENU_SIZE; i++) waterSettings[i] = 0;
+            }
+            currentValue = waterSettings[whichItem];
+            break;
+        case WR_3_DROP_SIZE:
+            currentName = "Drop 3 Size: ";
+            currentMin = 0;
+            currentMax = 500;
+            if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
+            if (waterSettings[WR_2_DROP_SIZE] == 0) {
+                for (int i = WR_2_DROP_SIZE; i < WR_MENU_SIZE; i++) waterSettings[i] = 0;
+            }
+            currentValue = waterSettings[whichItem];
+            if (waterSettings[WR_3_DROP_SIZE] == 0) {
+                for (int i = WR_3_DROP_SIZE; i < WR_MENU_SIZE; i++) waterSettings[i] = 0;
+            }
+            break;
+        case WR_3_DROP_DELAY:
+            currentName = "Drop 3 Delay: ";
+            currentMin = 0;
+            currentMax = 500;
+            if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
+            if (waterSettings[WR_3_DROP_SIZE] == 0) {
+                for (int i = WR_3_DROP_SIZE; i < WR_MENU_SIZE; i++) waterSettings[i] = 0;
+            }
+            currentValue = waterSettings[whichItem];
+            break;
+        case WR_3_FLASH_DELAY:
+            currentName = "Flash Delay 3: ";
+            currentMin = 0;
+            currentMax = 500;
+            if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
+            if (waterSettings[WR_3_DROP_SIZE] == 0) {
+                for (int i = WR_3_DROP_SIZE; i < WR_MENU_SIZE; i++) waterSettings[i] = 0;
+            }
+            currentValue = waterSettings[whichItem];
+            break;
+        default:
+            currentName = "";
+            currentValue = "";
+        }
+        return;
+    }
+    
+
+
 }
 
 String decodeItemValue(int value, byte lookupChart) {
@@ -266,7 +374,7 @@ void PrintScreen() {
     
 }
 
- // Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
+// Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
 String PrintMenuLine(byte screenLine) {
     String theLine;
     int whichItem = currentPage + screenLine; // figure out which menu item is needed
@@ -338,10 +446,6 @@ void buttonItemRight(bool holdDown) {
         }
         if (changeAmt != 0) menuItem(currentItem, changeAmt);
     }
-
-/*     if (mode == STANDBY_MODE) {
-        menuItem(currentItem, 1);
-    } */
 }
 
 void buttonCancel() {
