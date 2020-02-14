@@ -9,6 +9,7 @@
     #include <SimpleDHT.h>
     #include <VL53L1X.h>
     #include "menu.h"
+    #include "actions.h"
 
 // Input Pins
     const int SOUND_SENSOR = A0;
@@ -31,24 +32,28 @@
     const byte USDistanceAVG = 3;
     const byte TempRetries = 10;
     const unsigned int TempUpdateFreq = 60000;
+    const unsigned int RestBetweenShots = 2000;
 
 // Modes - current status of the OPT Control
     extern byte mode;
     const byte STANDBY_MODE = 1;
-    const byte DISTANCE_MODE = 2; // Shooting with the distance trigger
-    const byte SOUND_MODE = 3; // Shooting with the sound trigger
-    const byte WATER_MODE = 4; // Running a waterdrop shoot
-    const byte LIGTNING_MODE = 5; // Shooting lightning shots
-    const byte INTERVAL_MODE = 6; // Shooting in intervalometer mode
+    const byte CANCELLING_MODE = 2;
+    const byte DISTANCE_MODE = 3; // Shooting with the distance trigger
+    const byte SOUND_MODE = 4; // Shooting with the sound trigger
+    const byte WATER_MODE = 5; // Running a waterdrop shoot
+    const byte LIGTNING_MODE = 6; // Shooting lightning shots
+    const byte INTERVAL_MODE = 7; // Shooting in intervalometer mode
+    
 
 // Components
     extern LiquidCrystal_I2C lcd;
     extern PCF857x buttonController;
     extern VL53L1X laserDistance;
+    extern SimpleDHT11 tempSensor;
 
 // Flags
-    extern volatile bool PCFInterruptFlag;
-    extern byte buttonState;
+    // extern volatile bool buttonInterruptFlag;
+    // extern byte buttonState;
 
 // i2c Addresses
     /*
@@ -72,18 +77,7 @@
     void PCFInterrupt(); //Handle button interrupts 
     void testSetup(); //so test code doesn't clutter main code
     void testLoop(); //so test code doesn't clutter main code
-
     void handleButton(); // debounce button presses and trigger events
-
-// Functions - Physical actions
-    void flash(); // Trigger the connected flash
-    void shutterOpen(bool hold=false); // Trigger the shutter. If @param hold is set true, must use shutterClose() to close shutter
-    void shutterClose(); // Close the shutter
-
-//Functions - Sensors
-    void getTemp(); // Get current temp & humidity. This is currently local to definitions.cpp
-    double getUSDistance(bool accurate = true); // return ultrasonic distance. Uses temperature if @param accurate = true
-    double getUSDistanceAVG(bool accurate = true); // take multiple readings and return average ultrasonic distance
 
 //Functions - Helpers
     String padInt(int number, int spaces); // take an integer and return it as a string with a set minimum length

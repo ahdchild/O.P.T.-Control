@@ -13,7 +13,7 @@
     const byte SettingsMenu = 5;
 
 // Distance Menu
-    const byte DIST_MENU_SIZE = 5;
+    const byte DIST_MENU_SIZE = 6;
 
     // Settings array
     extern int distanceSettings[];
@@ -23,7 +23,8 @@
     const byte DM_DISTANCE = 1;
     const byte DM_WHEN = 2;
     const byte DM_RANGE = 3;
-    const byte DM_DELAY = 4;
+    const byte DM_CONTINUOUS = 4;
+    const byte DM_DELAY = 5;
 
 // Sound Menu
     const byte SO_MENU_SIZE = 2;
@@ -51,6 +52,41 @@
     const byte WR_3_DROP_DELAY = 6;
     const byte WR_3_FLASH_DELAY = 7;
 
+// Lightning Menu
+    const byte LI_MENU_SIZE = 2;
+
+    // Settings array
+    extern int lightningSettings[];
+
+    // index values for settings
+    const byte LI_CHANGE_AMT = 0;
+    const byte LI_HOLD_SHUTTER = 1;
+
+// Intervalometer Menu
+    const byte INT_MENU_SIZE = 8;
+
+    // Settings array
+    extern int IntervalometerSettings[];
+
+    // index values for settings
+    const byte INT_AUTO = 0;
+    const byte INT_TOTAL_SHOTS = 1;
+    const byte INT_TOTAL_TIME = 2;
+    const byte INT_SHOOT_EVERY = 3;
+    const byte INT_INITIAL_DELAY = 4;
+    const byte INT_HOLD_SHUTTER = 5;
+    const byte INT_TOTAL_TIME_UNITS = 6; // not a seperately visible setting. Toggle with measure
+    const byte INT_SHOOT_EVERY_UNITS = 7; // not a seperately visible setting. Toggle with measure
+
+// Settings Menu
+    const byte SET_MENU_SIZE = 2;
+
+    // Settings array
+    extern int SettingSettings[];
+    
+    // index values for settings
+    const byte SET_TRIGGER = 0;
+    const byte SET_LIGHT = 1;
 
 // Lookup charts
     const byte ONOFF_CHART = 1;
@@ -58,15 +94,40 @@
     const byte RANGE_CHART = 3;
     const byte SENSOR_CHART = 4;
     const byte INT_PRIORITY_CHART = 5;
+    const byte TIME_UNIT_CHART = 6;
+    
  
     // values for which distance sensor is used
-    const byte USE_LASER = 0;
-    const byte USE_ULTRASONIC = 1;
+    const int USE_LASER = 0;
+    const int USE_ULTRASONIC = 1;
 
     // values for distance trigger condition
-    const byte GREATER_THAN = 0;
-    const byte LESS_THAN = 1;
-    const byte AROUND = 2;
+    const int GREATER_THAN = 0;
+    const int LESS_THAN = 1;
+    const int AROUND = 2;
+    const int ON_CHANGE = 3;
+
+    // values for intervalometer lock mode
+    const int SHOT_COUNT = 0;
+    const int TOTAL_TIME = 1;
+    const int SHOOT_EVERY = 2;
+
+    // values for time units
+    const int SECONDS = 0;
+    const int MINUTES = 1;
+    const int HOURS = 2;
+    const int DAYS = 3;
+
+    // values for trigger chart
+    const int FIRE_FLASH = 0;
+    const int FIRE_SHUTTER = 1;
+    const int LOCKUP = 2;
+
+    // values for on off chart
+
+    const int OFF = 0;
+    const int ON = 1;
+    const int AUTO = 2;
 
 //menu navigation & display variables
     const byte lastMenu = SettingsMenu; // used to determine when we're at the end of the list
@@ -100,6 +161,7 @@
     void menuItem(int whichItem, int action=0);
     void changeCurrentMenu(int whichMenu);
     String decodeItemValue(int value, byte lookupChart);
+    void automateIntervalometer();
 
     void PrintScreen(); // clear the screen. Print each line starting from currentPage
     String PrintMenuLine(byte screenLine); // Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
@@ -109,7 +171,9 @@
     void buttonItemLeft(bool holdDown = false);
     void buttonItemRight(bool holdDown = false);
     void buttonCancel();
+    void buttonMeasure();
  
     int limitValue(int value); // confine a vaule to currentMax and currentMin
+    String simplifySeconds(int seconds);
 
 #endif

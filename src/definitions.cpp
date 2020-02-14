@@ -1,23 +1,22 @@
 #include "definitions.h"
 
-// Externs definitions
+// Components
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 PCF857x buttonController(0x20, &Wire);
-byte temperature = 0;
-byte humidity = 0;
-byte buttonState = B11111111;
-byte mode = STANDBY_MODE;
-
-
-volatile bool PCFInterruptFlag = false;
+SimpleDHT11 tempSensor(TEMPERATURE);
 VL53L1X laserDistance;
+
+// 1 byte represents 8 buttons
+byte buttonState = B11111111;
+volatile bool buttonInterruptFlag = false;
 long lastDebounceTime[] = {0,0,0,0,0,0,0,0};
 const long debounceDelay = 10;
 
-// Non Extern Variables
-SimpleDHT11 tempSensor(TEMPERATURE);
-unsigned long lastFlash = 0;
-unsigned int lastTempUpdate = millis();
+// Track current operating mode
+byte mode = STANDBY_MODE;
+
+
+//FUNCTIONS
 
 //initialize pins, modules, etc
 void initializeStuff() {
@@ -59,86 +58,17 @@ void initializeStuff() {
     // Initialize variables
     getTemp();
     defaultSettings();
+
+    // Start with the lights on
+    lightsOn();
 }
 
 // Handle button interrupts
 void PCFInterrupt() {
-  PCFInterruptFlag = true;
+  buttonInterruptFlag = true;
 }
 
-void flash() {
-    unsigned int currentTime = millis();
 
-    if (currentTime - lastFlash > flashCooldown) {  
-        lastFlash = currentTime;
-        digitalWrite(FLASH_TRIGGER, HIGH);
-        delay(10);
-    }
-    digitalWrite(FLASH_TRIGGER, LOW);
-}
-
-void shutterOpen(bool hold) {
-    digitalWrite(CAMERA_SHUTTER, HIGH);
-    if (!hold) {
-        delay(100);
-        shutterClose();
-    }
-}
-
-void shutterClose() {
-    digitalWrite(CAMERA_SHUTTER, LOW);
-}
-
-void getTemp() {
-    byte maxTries = TempRetries;
-    int err;
-    do{
-        err = tempSensor.read(&temperature, &humidity, NULL);
-        maxTries--;
-    } while (err != SimpleDHTErrSuccess && maxTries > 0);
-}
-
-double getUSDistance(bool accurate) {
-    long duration;
-    double distance = 0;
-    float speedofsound = 340;
-
-    // Clear the trigPin by setting it LOW:
-    digitalWrite(US_TRIGGER, LOW);
-    delayMicroseconds(5);
-
-    // Trigger the sensor by setting the trigPin high for 10 microseconds:
-    digitalWrite(US_TRIGGER, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(US_TRIGGER, LOW);
-
-    // Read the echoPin, pulseIn() returns the duration (length of the pulse) in microseconds:
-    duration = pulseIn(US_ECHO, HIGH);
-    
-    // Use current temperature tyo calculate more accuarate speed of sound
-    if (accurate) {
-        unsigned int currentTime = millis();
-        // update temp if it hasn't been updated recently
-        if (currentTime-lastTempUpdate>TempUpdateFreq) {
-            getTemp();
-            lastTempUpdate = currentTime;
-        }
-        speedofsound = 331.3+(0.606*temperature);
-    }
-    // Calculate the distance:
-    distance= duration*(speedofsound/10000)/2;
-
-    return distance;
-}
-
-double getUSDistanceAVG(bool accurate) {
-    double distance = 0;
-    for (int i = 0; i<USDistanceAVG; i++){
-        distance += getUSDistance(accurate);
-    }
-    distance = distance/USDistanceAVG;
-    return distance;
-}
 
 String padInt(int number, int spaces) {
     if (spaces > 4) spaces = 4;
@@ -155,7 +85,7 @@ String padInt(int number, int spaces) {
 
 void handleButton() {
     // do nothing if interrupt has not been triggered
-    if (!PCFInterruptFlag) {
+    if (!buttonInterruptFlag) {
         if (!bitRead(buttonState, BT_LEFT)) {
             buttonItemLeft(true);
         } else if (!bitRead(buttonState, BT_RIGHT)) {
@@ -164,7 +94,7 @@ void handleButton() {
         return;
     }
 
-    PCFInterruptFlag = false;
+    buttonInterruptFlag = false;
     bool timePassed[8];
 
     byte newButtonState = buttonController.read8();
@@ -177,6 +107,14 @@ void handleButton() {
     }
 
     // do things with the buttons. When debounce matters, checkstatus of timePassed[i] first
+    
+    if (timePassed[BT_CANCEL]) {
+        // if it's pressed but wasn't before
+        if (!bitRead(newButtonState, BT_CANCEL) && bitRead(buttonState, BT_CANCEL)) {
+            buttonCancel();
+        }
+    }
+    
     if (timePassed[BT_UP]) {
         // if it's pressed but wasn't before
         if (!bitRead(newButtonState, BT_UP) && bitRead(buttonState, BT_UP)) {
@@ -205,13 +143,19 @@ void handleButton() {
         }
     }
 
-    if (timePassed[BT_CANCEL]) {
+    if (timePassed[BT_MEASURE]) {
         // if it's pressed but wasn't before
-        if (!bitRead(newButtonState, BT_CANCEL) && bitRead(buttonState, BT_CANCEL)) {
-            buttonCancel();
+        if (!bitRead(newButtonState, BT_MEASURE) && bitRead(buttonState, BT_MEASURE)) {
+            buttonMeasure();
         }
     }
 
+    if (timePassed[BT_SHOOT]) {
+        // if it's pressed but wasn't before
+        if (!bitRead(newButtonState, BT_SHOOT) && bitRead(buttonState, BT_SHOOT)) {
+            buttonShoot();
+        }
+    }
 
     buttonState = newButtonState; 
 }
@@ -221,3 +165,4 @@ String shortenString(String text, byte length) {
     text.remove(length);
     return text;
 }
+
