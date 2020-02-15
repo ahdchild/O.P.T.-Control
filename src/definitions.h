@@ -41,7 +41,7 @@
     const byte DISTANCE_MODE = 3; // Shooting with the distance trigger
     const byte SOUND_MODE = 4; // Shooting with the sound trigger
     const byte WATER_MODE = 5; // Running a waterdrop shoot
-    const byte LIGTNING_MODE = 6; // Shooting lightning shots
+    const byte LIGHTNING_MODE = 6; // Shooting lightning shots
     const byte INTERVAL_MODE = 7; // Shooting in intervalometer mode
     
 

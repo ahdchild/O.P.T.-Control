@@ -79,7 +79,7 @@
     const byte INT_SHOOT_EVERY_UNITS = 7; // not a seperately visible setting. Toggle with measure
 
 // Settings Menu
-    const byte SET_MENU_SIZE = 2;
+    const byte SET_MENU_SIZE = 3;
 
     // Settings array
     extern int SettingSettings[];
@@ -87,6 +87,7 @@
     // index values for settings
     const byte SET_TRIGGER = 0;
     const byte SET_LIGHT = 1;
+    const byte SET_SCREEN = 2;
 
 // Lookup charts
     const byte ONOFF_CHART = 1;

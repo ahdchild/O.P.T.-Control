@@ -6,9 +6,9 @@
 
 // Functions - Physical actions
     void flash(); // Trigger the connected flash
-    
     void shutterOpen(bool hold=false); // Trigger the shutter. If @param hold is set true, must use shutterClose() to close shutter
     void shutterClose(); // Close the shutter
+    void lockup();
 
     void takeShot(); // trigger flash, shutter, or lockup depending on settings
 
@@ -19,7 +19,12 @@
 
 // Shoot actions
 void shootDistance();
+void shootSound();
+void shootWaterdrop();
+void shootLightning();
+void shootIntervalometer();
 void cancelShoot();
+
 
 //Functions - Sensors
     void getTemp(); // Get current temp & humidity. This is currently local to definitions.cpp

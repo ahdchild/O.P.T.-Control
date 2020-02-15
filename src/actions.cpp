@@ -2,6 +2,7 @@
 
 byte temperature = 0;
 byte humidity = 0;
+int lastLightReading;
 
 //Track when temperature was updated
 unsigned int lastTempUpdate = 0;
@@ -32,6 +33,14 @@ void shutterOpen(bool hold) {
 
 void shutterClose() {
     digitalWrite(CAMERA_SHUTTER, LOW);
+}
+
+void lockup() {
+    shutterOpen(true);
+    delay(150);
+    flash();
+    delay(10);
+    shutterClose();
 }
 
 void getTemp() {
@@ -92,17 +101,18 @@ void createWaterdrop(int milliseconds) {
 }
 
 void lightsOn() {
+    lcd.backlight();
+
     if (SettingSettings[SET_LIGHT] != OFF) {
-        lcd.backlight();
         digitalWrite(ROOM_LIGHT, HIGH);
     }
 }
 
 void lightsOff(bool screen) {
     if (SettingSettings[SET_LIGHT] != ON) {
-        if (screen) lcd.noBacklight();
         digitalWrite(ROOM_LIGHT, LOW);
     }
+    if (screen && SettingSettings[SET_SCREEN] == AUTO) lcd.noBacklight();
   }
 
 double getDistance(bool average) {
@@ -116,21 +126,58 @@ double getDistance(bool average) {
 }
 
 void takeShot() {
+
+    switch (SettingSettings[SET_TRIGGER])
+    {
+    case FIRE_FLASH:
+        flash();
+        break;
+    case FIRE_SHUTTER:
+        shutterOpen();
+        break;
+    case LOCKUP:
+        flash();
+        delay(10);
+        shutterClose();
+        break;
     
-    flash();
+    default:
+        break;
+    }
 }
 
 void buttonShoot() {
     if (mode != STANDBY_MODE) return;
 
-    if (currentMenu == DistanceMenu) {
-        getTemp();
-        lightsOff();
-        if (distanceSettings[DM_WHEN] == ON_CHANGE)
-            distanceSettings[DM_DISTANCE] = getDistance();
-        mode = DISTANCE_MODE;
-        lcd.clear();
+    switch (currentMenu)
+    {
+        case DistanceMenu:
+            getTemp();
+            lightsOff(true);
+            if (distanceSettings[DM_WHEN] == ON_CHANGE)
+                distanceSettings[DM_DISTANCE] = getDistance();
+            mode = DISTANCE_MODE;
+            break;
+        case SoundMenu:
+            lightsOff(true);
+            mode = SOUND_MODE;
+            break;
+        case LightningMenu:
+            // lightsOff(true);
+            mode = LIGHTNING_MODE;
+            lastLightReading = analogRead(LIGHT_SENSOR);
+            break;
     }
+
+    
+    if (mode > CANCELLING_MODE) {
+        lcd.clear();  
+        if (SettingSettings[SET_TRIGGER] == LOCKUP) {
+            shutterOpen(true);
+            delay(150);
+        }
+    }
+
 }
 
 void shootDistance() {
@@ -139,10 +186,10 @@ void shootDistance() {
     double distance = getDistance();
     bool shoot = false;
 
-    lcd.home();
+/*     lcd.home();
     lcd.print("Distance = ");
     lcd.print(distance);
-    lcd.print("cm    ");
+    lcd.print("cm    "); */
 
 
     if (distanceSettings[DM_WHEN] == GREATER_THAN && distance > distanceSettings[DM_DISTANCE])
@@ -162,9 +209,62 @@ void shootDistance() {
         takeShot();
         lastShot = millis();
         if (!distanceSettings[DM_CONTINUOUS]) mode = CANCELLING_MODE;
+        else if (SettingSettings[SET_TRIGGER] == LOCKUP) {
+            shutterOpen(true);
+            delay(150);
+        }
+        
     }
 }
 
+void shootSound() {
+    if (millis() - lastShot < RestBetweenShots) return;
+
+    bool shoot = false;
+    int noise = analogRead(SOUND_SENSOR);
+
+    if (noise > soundSettings[SO_THRESHOLD]) shoot = true;
+
+    if (shoot) {
+        if (soundSettings[SO_DELAY]>0) delay(soundSettings[SO_DELAY]);
+        takeShot();
+        lastShot = millis();
+        if (!distanceSettings[DM_CONTINUOUS]) mode = CANCELLING_MODE;
+        else if (SettingSettings[SET_TRIGGER] == LOCKUP) {
+            shutterOpen(true);
+            delay(150);
+        }
+    }
+}
+
+void shootWaterdrop() {
+
+}
+
+void shootLightning() {
+    if (millis() - lastShot < RestBetweenShots) return;
+
+    bool shoot = false;
+    int currentLight = analogRead(LIGHT_SENSOR);
+
+    if (lastLightReading - currentLight > lightningSettings[LI_CHANGE_AMT]) shoot = true;
+
+    lastLightReading = currentLight;
+
+    if (shoot) {
+        shutterOpen();
+        lastShot = millis();
+        if (!distanceSettings[DM_CONTINUOUS]) mode = CANCELLING_MODE;
+
+        lcd.setCursor(0,1);
+        lcd.print("triggered at ");
+        lcd.print(padInt(lastLightReading - currentLight, 3));
+    }
+}
+
+void shootIntervalometer() {
+
+}
 
 void cancelShoot() {
         lcd.clear();

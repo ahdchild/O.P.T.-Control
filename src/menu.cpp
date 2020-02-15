@@ -65,6 +65,7 @@ void defaultSettings() {
     
     SettingSettings[SET_TRIGGER] = FIRE_FLASH;
     SettingSettings[SET_LIGHT] = AUTO;
+    SettingSettings[SET_SCREEN] = AUTO;
 }
 
 String menuName() {
@@ -445,6 +446,14 @@ void menuItem(int whichItem, int action) {
             if (SettingSettings[whichItem] != OFF) lightsOn();
             else lightsOff();
             break;
+        case SET_SCREEN:
+            currentName = "Screen: ";
+            currentMin = 1;
+            currentMax = 2;
+            if (action != 0) SettingSettings[whichItem] = limitValue(SettingSettings[whichItem] + action);
+            currentValue = decodeItemValue(SettingSettings[whichItem], ONOFF_CHART);
+            break;        
+        
         default:
             currentName = "";
             currentValue = "";
@@ -623,15 +632,20 @@ void buttonMeasure() {
     }
 
     if (currentMenu == SoundMenu && currentItem == SO_THRESHOLD) {
+        int averageSound = 0;
+        
         lcd.clear();
         lcd.setCursor(0,1);
         lcd.print("Shhh! I'm listening!");
+        delay(500);
         lcd.setCursor(0,2);
         for (int i = 0; i < 20; i++) {
+            averageSound += analogRead(SOUND_SENSOR);
             lcd.print(".");
             delay(50);
         }
-        soundSettings[SO_THRESHOLD] = analogRead(SOUND_SENSOR);
+        averageSound = averageSound / 20;
+        soundSettings[SO_THRESHOLD] = averageSound;
         screenReprintNeeded = true;
     }
 
