@@ -74,28 +74,28 @@ String menuName() {
     switch (currentMenu)
     {
     case MainMenu:
-        theName = "Main Menu";
+        theName = F("Main Menu");
         break;
     case DistanceMenu:
-        theName = "Distance Trig";
+        theName = F("Distance Trig");
         break;
     case SoundMenu:
-        theName = "Sound Trig";
+        theName = F("Sound Trig");
         break;
     case WaterMenu:
-        theName = "Waterdrops";
+        theName = F("Waterdrops");
         break;
     case LightningMenu:
-        theName = "Lightning Trig";
+        theName = F("Lightning Trig");
         break;
     case IntervalometerMenu:
-        theName = "Intervalometer";
+        theName = F("Intervalometer");
         break;
     case SettingsMenu:
-        theName = "Settings";
+        theName = F("Settings");
         break;
     default:
-        theName = "Error";
+        theName = F("Error");
         break;
     }
     return theName;
@@ -146,26 +146,26 @@ void menuItem(int whichItem, int action) {
         switch (whichItem)
         {
         case DistanceMenu:
-            currentName = "Distance Trigger -> ";
+            currentName = F("Distance Trigger -> ");
             break;
         case SoundMenu:
-            currentName = "Sound Trigger -> ";
+            currentName = F("Sound Trigger -> ");
             break;
         case WaterMenu:
-            currentName = "Waterdrop -> ";
+            currentName = F("Waterdrop -> ");
             break;
         case LightningMenu:
-            currentName = "Lightning -> ";
+            currentName = F("Lightning -> ");
             break;
         case IntervalometerMenu:
-            currentName = "Intervalometer -> ";
+            currentName = F("Intervalometer -> ");
             break;
         case SettingsMenu:
-            currentName = "Settings -> ";
+            currentName = F("Settings -> ");
             break;                            
         default:
-            currentName = "Item Error";
-            currentValue = "333";
+            currentName = "";
+            currentValue = "";
             break;
         }
         return;
@@ -176,14 +176,14 @@ void menuItem(int whichItem, int action) {
         switch (whichItem)
         {
         case DM_SENSOR:
-            currentName = "Sensor: ";
+            currentName = F("Sensor: ");
             currentMin = 0;
             currentMax = 1;
             if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
             currentValue = decodeItemValue(distanceSettings[whichItem], SENSOR_CHART);
             break;
         case DM_DISTANCE:
-            currentName = "Distance: ";
+            currentName = F("Distance: ");
             currentMin = 1;
             currentMax = 400;
             if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
@@ -191,14 +191,14 @@ void menuItem(int whichItem, int action) {
             if (distanceSettings[DM_WHEN] == ON_CHANGE) currentValue = "Off";
             break;
         case DM_WHEN:
-            currentName = "When: ";
+            currentName = F("When: ");
             currentMin = 0;
             currentMax = 3;
             if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
             currentValue = decodeItemValue(distanceSettings[whichItem], RANGE_CHART);
             break;
         case DM_RANGE:
-            currentName = "+/- Range: ";
+            currentName = F("+/- Range: ");
             currentMin = 1;
             currentMax = 100;
             if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
@@ -206,22 +206,22 @@ void menuItem(int whichItem, int action) {
             if (distanceSettings[DM_WHEN] < AROUND) currentValue = "Off";
             break;
         case DM_CONTINUOUS:
-            currentName = "Continuous: ";
+            currentName = F("Continuous: ");
             currentMin = 0;
             currentMax = 1;
             if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
             currentValue = decodeItemValue(distanceSettings[whichItem], ONOFF_CHART);
             break;                               
         case DM_DELAY:
-            currentName = "Delay: ";
+            currentName = F("Delay: ");
             currentMin = 0;
             currentMax = 1000;
             if (action != 0) distanceSettings[whichItem] = limitValue(distanceSettings[whichItem] + action);
             currentValue = distanceSettings[whichItem];
             break;                                         
         default:
-            currentName = "Item Error";
-            currentValue = "123";
+            currentName = "";
+            currentValue = "";
             break;
         }
         return;
@@ -232,14 +232,14 @@ void menuItem(int whichItem, int action) {
         switch (whichItem)
         {
         case SO_THRESHOLD:
-            currentName = "Threshold: ";
+            currentName = F("Threshold: ");
             currentMin = 0;
             currentMax = 255;
             if (action != 0) soundSettings[whichItem] = limitValue(soundSettings[whichItem] + action);
             currentValue = soundSettings[whichItem];
             break;
         case SO_DELAY:
-            currentName = "Delay: ";
+            currentName = F("Delay: ");
             currentMin = 0;
             currentMax = 1000;
             if (action != 0) soundSettings[whichItem] = limitValue(soundSettings[whichItem] + action);
@@ -257,32 +257,32 @@ void menuItem(int whichItem, int action) {
         switch (whichItem)
         {
         case WR_1_DROP_SIZE:
-            currentName = "Drop 1 Size: ";
+            currentName = F("Drop 1 Size: ");
             currentMin = 1;
             currentMax = 500;
             if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
             currentValue = String(waterSettings[whichItem]) + "ms";
             break;
         case WR_1_FLASH_DELAY:
-            currentName = "Flash Delay 1: ";
+            currentName = F("Flash Delay 1: ");
             currentMin = 0;
             currentMax = 500;
             if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
             currentValue = waterSettings[whichItem];
             break;
         case WR_2_DROP_SIZE:
-            currentName = "Drop 2 Size: ";
+            currentName = F("Drop 2 Size: ");
             currentMin = 0;
             currentMax = 500;
             if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
             currentValue = waterSettings[whichItem];
             if (waterSettings[WR_2_DROP_SIZE] == 0) {
                 for (int i = WR_2_DROP_SIZE; i < WR_MENU_SIZE; i++) waterSettings[i] = 0;
-                currentValue = "Off";
+                currentValue = F("Off");
             }
             break;
         case WR_2_DROP_DELAY:
-            currentName = "Drop 2 Delay: ";
+            currentName = F("Drop 2 Delay: ");
             currentMin = 0;
             currentMax = 500;
             if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
@@ -292,7 +292,7 @@ void menuItem(int whichItem, int action) {
             currentValue = waterSettings[whichItem];
             break;
         case WR_2_FLASH_DELAY:
-            currentName = "Flash Delay 2: ";
+            currentName = F("Flash Delay 2: ");
             currentMin = 0;
             currentMax = 500;
             if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
@@ -302,7 +302,7 @@ void menuItem(int whichItem, int action) {
             currentValue = waterSettings[whichItem];
             break;
         case WR_3_DROP_SIZE:
-            currentName = "Drop 3 Size: ";
+            currentName = F("Drop 3 Size: ");
             currentMin = 0;
             currentMax = 500;
             if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
@@ -312,11 +312,11 @@ void menuItem(int whichItem, int action) {
             currentValue = waterSettings[whichItem];
             if (waterSettings[WR_3_DROP_SIZE] == 0) {
                 for (int i = WR_3_DROP_SIZE; i < WR_MENU_SIZE; i++) waterSettings[i] = 0;
-                currentValue = "Off";
+                currentValue = F("Off");
             }
             break;
         case WR_3_DROP_DELAY:
-            currentName = "Drop 3 Delay: ";
+            currentName = F("Drop 3 Delay: ");
             currentMin = 0;
             currentMax = 500;
             if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
@@ -326,7 +326,7 @@ void menuItem(int whichItem, int action) {
             currentValue = waterSettings[whichItem];
             break;
         case WR_3_FLASH_DELAY:
-            currentName = "Flash Delay 3: ";
+            currentName = F("Flash Delay 3: ");
             currentMin = 0;
             currentMax = 500;
             if (action != 0) waterSettings[whichItem] = limitValue(waterSettings[whichItem] + action);
@@ -347,19 +347,19 @@ void menuItem(int whichItem, int action) {
         switch (whichItem)
         {
         case LI_CHANGE_AMT:
-            currentName = "Light Change: ";
+            currentName = F("Light Change: ");
             currentMin = 1;
             currentMax = 100;
             if (action != 0) lightningSettings[whichItem] = limitValue(lightningSettings[whichItem] + action);
             currentValue = lightningSettings[whichItem];
             break;
         case LI_HOLD_SHUTTER:
-            currentName = "Hold Shutter: ";
+            currentName = F("Hold Shutter: ");
             currentMin = 0;
             currentMax = 60;
             if (action != 0) lightningSettings[whichItem] = limitValue(lightningSettings[whichItem] + action);
             currentValue = lightningSettings[whichItem];
-            if (currentValue == "0") currentValue = "Off";
+            if (currentValue == "0") currentValue = F("Off");
             break;
         default:
             currentName = "";
@@ -373,14 +373,14 @@ void menuItem(int whichItem, int action) {
         switch (whichItem)
         {
         case INT_AUTO:
-            currentName = "Automate: ";
+            currentName = F("Automate: ");
             currentMin = 0;
             currentMax = 2;
             if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
             currentValue = decodeItemValue(IntervalometerSettings[whichItem], INT_PRIORITY_CHART);
             break;
         case INT_TOTAL_SHOTS:
-            currentName = "Total Shots: ";
+            currentName = F("Total Shots: ");
             currentMin = 0;
             currentMax = 10000;
             if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
@@ -388,7 +388,7 @@ void menuItem(int whichItem, int action) {
             currentValue = IntervalometerSettings[whichItem];
             break;
         case INT_TOTAL_TIME:
-            currentName = "Total Time: ";
+            currentName = F("Total Time: ");
             currentMin = 0;
             currentMax = 10000;
             if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
@@ -396,7 +396,7 @@ void menuItem(int whichItem, int action) {
             currentValue = IntervalometerSettings[whichItem];
             break;
         case INT_SHOOT_EVERY:
-            currentName = "Shoot Every: ";
+            currentName = F("Shoot Every: ");
             currentMin = 0;
             currentMax = 3600;
             if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
@@ -404,20 +404,20 @@ void menuItem(int whichItem, int action) {
             currentValue = IntervalometerSettings[whichItem];
             break;
         case INT_INITIAL_DELAY:
-            currentName = "Initial Delay: ";
+            currentName = F("Initial Delay: ");
             currentMin = 0;
             currentMax = 3600;
             if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
             currentValue = IntervalometerSettings[whichItem];
-            if (currentValue == "0") currentValue = "Off";
+            if (currentValue == "0") currentValue = F("Off");
             break;
         case INT_HOLD_SHUTTER:
-            currentName = "Hold Shutter: ";
+            currentName = F("Hold Shutter: ");
             currentMin = 0;
             currentMax = 60;
             if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
             currentValue = IntervalometerSettings[whichItem];
-            if (currentValue == "0") currentValue = "Off";
+            if (currentValue == "0") currentValue = F("Off");
             break;
         default:
             currentName = "";
@@ -431,14 +431,14 @@ void menuItem(int whichItem, int action) {
         switch (whichItem)
         {
         case SET_TRIGGER:
-            currentName = "Control: ";
+            currentName = F("Control: ");
             currentMin = 0;
             currentMax = 1;
             if (action != 0) SettingSettings[whichItem] = limitValue(SettingSettings[whichItem] + action);
             currentValue = decodeItemValue(SettingSettings[whichItem], TRIGGER_CHART); 
             break;
         case SET_LIGHT:
-            currentName = "Light: ";
+            currentName = F("Light: ");
             currentMin = 0;
             currentMax = 2;
             if (action != 0) SettingSettings[whichItem] = limitValue(SettingSettings[whichItem] + action);
@@ -447,7 +447,7 @@ void menuItem(int whichItem, int action) {
             else lightsOff();
             break;
         case SET_SCREEN:
-            currentName = "Screen: ";
+            currentName = F("Screen: ");
             currentMin = 1;
             currentMax = 2;
             if (action != 0) SettingSettings[whichItem] = limitValue(SettingSettings[whichItem] + action);
@@ -471,22 +471,22 @@ String decodeItemValue(int value, byte lookupChart) {
     
     switch (lookupChart) {
         case ONOFF_CHART:
-            conversionChart = new String[3]{"off", "on", "auto"};
+            conversionChart = new String[3]{F("off"), F("on"), F("auto")};
             break;
         case TRIGGER_CHART:
-            conversionChart = new String[3]{"Flash", "Shutter", "Lockup"};
+            conversionChart = new String[3]{F("Flash"), F("Shutter"), F("Lockup")};
             break;
         case RANGE_CHART:
-            conversionChart = new String[4]{"Dist > x", "Dist < x", "Dist = x", "Change"};
+            conversionChart = new String[4]{F("Dist > x"), F("Dist < x"), F("Dist = x"), F("Change")};
             break;
         case SENSOR_CHART:
-            conversionChart = new String[2] {"Laser", "Sound"};
+            conversionChart = new String[2] {F("Laser"), F("Sound")};
             break;
         case INT_PRIORITY_CHART:
-            conversionChart = new String[3]{"Shot Count", "Total Time", "Time Btwn"};
+            conversionChart = new String[3]{F("Shot Count"), F("Total Time"), F("Time Btwn")};
             break;
         case TIME_UNIT_CHART:
-            conversionChart = new String[4]{" secs", " mins", " hrs", " days"};
+            conversionChart = new String[4]{F(" secs"), F(" mins"), F(" hrs"), F(" days")};
             break;
         
         
@@ -533,7 +533,7 @@ void PrintScreen() {
         lineToPrint = PrintMenuLine(j-1);
         lineLength = lcd.print(shortenString(lineToPrint));
         // fill the rest of the line with space
-        for (i=lineLength; i < 20; i++) lcd.print(" ");
+        for (i=lineLength; i < 20; i++) lcd.print(F(" "));
     }
 
     lcd.setCursor(cursorPosition, (currentItem-currentPage) + 1);
@@ -636,12 +636,12 @@ void buttonMeasure() {
         
         lcd.clear();
         lcd.setCursor(0,1);
-        lcd.print("Shhh! I'm listening!");
+        lcd.print(F("Shhh! I'm listening!"));
         delay(500);
         lcd.setCursor(0,2);
         for (int i = 0; i < 20; i++) {
             averageSound += analogRead(SOUND_SENSOR);
-            lcd.print(".");
+            lcd.print(F("."));
             delay(50);
         }
         averageSound = averageSound / 20;

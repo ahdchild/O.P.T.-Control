@@ -186,12 +186,6 @@ void shootDistance() {
     double distance = getDistance();
     bool shoot = false;
 
-/*     lcd.home();
-    lcd.print("Distance = ");
-    lcd.print(distance);
-    lcd.print("cm    "); */
-
-
     if (distanceSettings[DM_WHEN] == GREATER_THAN && distance > distanceSettings[DM_DISTANCE])
         shoot = true;
     else if (distanceSettings[DM_WHEN] == LESS_THAN && distance < distanceSettings[DM_DISTANCE])
@@ -257,7 +251,6 @@ void shootLightning() {
         if (!distanceSettings[DM_CONTINUOUS]) mode = CANCELLING_MODE;
 
         lcd.setCursor(0,1);
-        lcd.print("triggered at ");
         lcd.print(padInt(lastLightReading - currentLight, 3));
     }
 }
@@ -268,7 +261,6 @@ void shootIntervalometer() {
 
 void cancelShoot() {
         lcd.clear();
-        lcd.print("cancelling");
         
         mode = STANDBY_MODE;
         shutterClose();
