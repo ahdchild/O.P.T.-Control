@@ -12,10 +12,10 @@ unsigned long lastFlash = 0;
 unsigned long lastShot = 0;
 
 // FUNCTIONS
-void flash() {
+void flash(bool override) {
     unsigned int currentTime = millis();
 
-    if (currentTime - lastFlash > flashCooldown) {  
+    if (currentTime - lastFlash > flashCooldown || override) {  
         lastFlash = currentTime;
         digitalWrite(FLASH_TRIGGER, HIGH);
         delay(10);
@@ -163,10 +163,18 @@ void buttonShoot() {
             mode = SOUND_MODE;
             break;
         case LightningMenu:
-            // lightsOff(true);
+            lightsOff(true);
             mode = LIGHTNING_MODE;
             lastLightReading = analogRead(LIGHT_SENSOR);
             break;
+        case WaterMenu:
+            lightsOff(true);
+            mode = WATER_MODE;
+            break;
+        case IntervalometerMenu:
+            mode = INTERVAL_MODE;
+            break;
+            
     }
 
     
@@ -232,6 +240,37 @@ void shootSound() {
 }
 
 void shootWaterdrop() {
+    //Prep
+    delay(200);
+    shutterOpen(true);
+    delay(150);
+
+    //Drop 1
+    createWaterdrop(waterSettings[WR_1_DROP_SIZE]);
+    delay(waterSettings[WR_1_FLASH_DELAY]);
+    flash();
+
+    //Drop 2
+    if (waterSettings[WR_2_DROP_SIZE] > 0) {
+        delay(waterSettings[WR_2_DROP_DELAY]);
+        createWaterdrop(waterSettings[WR_2_DROP_SIZE]);
+        delay(waterSettings[WR_2_FLASH_DELAY]);
+        flash(true);
+    }
+
+    //Drop 3
+    if (waterSettings[WR_3_DROP_SIZE] > 0) {
+        delay(waterSettings[WR_3_DROP_DELAY]);
+        createWaterdrop(waterSettings[WR_3_DROP_SIZE]);
+        delay(waterSettings[WR_3_FLASH_DELAY]);
+        flash(true);
+    }
+
+    //End
+    delay(20);
+    shutterClose();
+    delay(250);
+    mode = CANCELLING_MODE;
 
 }
 
@@ -256,6 +295,7 @@ void shootLightning() {
 }
 
 void shootIntervalometer() {
+    
 
 }
 

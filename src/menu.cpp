@@ -6,6 +6,7 @@ byte currentItem = 0;
 byte currentPage = 0;
 byte cursorPosition = 0;
 byte menuLength = lastMenu + 1; // how many items on current menu. initialize with main menu
+int previousMenu = MainMenu;
 
 // Should screen be reprinted
 bool screenReprintNeeded = true;
@@ -54,14 +55,12 @@ void defaultSettings() {
     lightningSettings[LI_CHANGE_AMT] = 10;
     lightningSettings[LI_HOLD_SHUTTER] = 0;
 
-    IntervalometerSettings[INT_AUTO] = SHOT_COUNT;
-    IntervalometerSettings[INT_TOTAL_SHOTS] = 12;
-    IntervalometerSettings[INT_TOTAL_TIME] = 120;
-    IntervalometerSettings[INT_SHOOT_EVERY] = 10;
-    IntervalometerSettings[INT_INITIAL_DELAY] = 0;
-    IntervalometerSettings[INT_HOLD_SHUTTER] = 0;
-    IntervalometerSettings[INT_TOTAL_TIME_UNITS] = SECONDS;
-    IntervalometerSettings[INT_SHOOT_EVERY_UNITS] = SECONDS;
+    IntervalometerSettings[INT_SECS] = 10;
+    IntervalometerSettings[INT_MINS] = 0;
+    IntervalometerSettings[INT_HRS] = 0;
+    IntervalometerSettings[INT_TOTAL_SHOTS] = 2;
+    IntervalometerSettings[INT_TOTAL_TIME] = 0;
+    IntervalometerSettings[INT_INITIAL_DELAY] = 0;  
     
     SettingSettings[SET_TRIGGER] = FIRE_FLASH;
     SettingSettings[SET_LIGHT] = AUTO;
@@ -106,11 +105,11 @@ void changeCurrentMenu(int whichMenu) {
 
     // offset menu index by 1 to account for main menu at -1
     menuSizes[1+MainMenu] = lastMenu + 1; 
-    menuSizes[1+DistanceMenu] = DIST_MENU_SIZE; 
-    menuSizes[1+SoundMenu] = SO_MENU_SIZE; 
-    menuSizes[1+WaterMenu] = WR_MENU_SIZE; 
-    menuSizes[1+LightningMenu] = LI_MENU_SIZE; 
-    menuSizes[1+IntervalometerMenu] = INT_MENU_SIZE; 
+    menuSizes[1+DistanceMenu] = DIST_MENU_SIZE + 1; // add extra 1 to show settings menu at the end
+    menuSizes[1+SoundMenu] = SO_MENU_SIZE + 1; // add extra 1 to show settings menu at the end
+    menuSizes[1+WaterMenu] = WR_MENU_SIZE + 1; // add extra 1 to show settings menu at the end
+    menuSizes[1+LightningMenu] = LI_MENU_SIZE + 1; // add extra 1 to show settings menu at the end
+    menuSizes[1+IntervalometerMenu] = INT_MENU_SIZE + 1; // add extra 1 to show settings menu at the end
     menuSizes[1+SettingsMenu] = SET_MENU_SIZE; 
     
     // check to see if whichMenu is in bounds before changing
@@ -121,6 +120,11 @@ void changeCurrentMenu(int whichMenu) {
             currentPage = currentMenu;
             // make sure screen is not scrolled down past the end
             if (lastMenu-itemsPerPage < currentPage) currentPage = (lastMenu-itemsPerPage)+1;
+        } else if (whichMenu > MainMenu && whichMenu < SettingsMenu && currentMenu != MainMenu) {
+            // if returning from settings submenu, set the cursor at the settings menu
+            currentItem = menuSizes[whichMenu+1] - 1;
+            currentPage = menuSizes[whichMenu+1] - 3;
+            if (currentPage < 0) currentPage = 0;
         } else {
             currentItem = 0; 
             currentPage = 0;
@@ -220,8 +224,7 @@ void menuItem(int whichItem, int action) {
             currentValue = distanceSettings[whichItem];
             break;                                         
         default:
-            currentName = "";
-            currentValue = "";
+            settingsSubMenu(action);
             break;
         }
         return;
@@ -246,8 +249,7 @@ void menuItem(int whichItem, int action) {
             currentValue = soundSettings[whichItem];
             break;
         default:
-            currentName = "";
-            currentValue = "";
+            settingsSubMenu(action);
         }
         return;
     }
@@ -336,8 +338,7 @@ void menuItem(int whichItem, int action) {
             currentValue = waterSettings[whichItem];
             break;
         default:
-            currentName = "";
-            currentValue = "";
+            settingsSubMenu(action);
         }
         return;
     }
@@ -362,8 +363,7 @@ void menuItem(int whichItem, int action) {
             if (currentValue == "0") currentValue = F("Off");
             break;
         default:
-            currentName = "";
-            currentValue = "";
+            settingsSubMenu(action);
         }
         return;
     }
@@ -372,36 +372,43 @@ void menuItem(int whichItem, int action) {
     if (currentMenu == IntervalometerMenu) {
         switch (whichItem)
         {
-        case INT_AUTO:
-            currentName = F("Automate: ");
+        case INT_SECS:
+            currentName = F("Interval Seconds: ");
             currentMin = 0;
-            currentMax = 2;
+            currentMax = 59;
             if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
-            currentValue = decodeItemValue(IntervalometerSettings[whichItem], INT_PRIORITY_CHART);
-            break;
+            maxIntervalShots();
+            currentValue = IntervalometerSettings[whichItem];
+            break;           
+        case INT_MINS:
+            currentName = F("Interval Minutes: ");
+            currentMin = 0;
+            currentMax = 59;
+            if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
+            maxIntervalShots();
+            currentValue = IntervalometerSettings[whichItem];
+            break;           
+        case INT_HRS:
+            currentName = F("Interval Hours: ");
+            currentMin = 0;
+            currentMax = 24;
+            if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
+            maxIntervalShots();
+            currentValue = IntervalometerSettings[whichItem];
+            break;                                    
         case INT_TOTAL_SHOTS:
             currentName = F("Total Shots: ");
-            currentMin = 0;
-            currentMax = 10000;
+            currentMin = 1;
+            currentMax = maxIntervalShots();
             if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
-            automateIntervalometer();
             currentValue = IntervalometerSettings[whichItem];
             break;
         case INT_TOTAL_TIME:
-            currentName = F("Total Time: ");
+            currentName = F(" ");
             currentMin = 0;
-            currentMax = 10000;
-            if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
-            automateIntervalometer();
-            currentValue = IntervalometerSettings[whichItem];
-            break;
-        case INT_SHOOT_EVERY:
-            currentName = F("Shoot Every: ");
-            currentMin = 0;
-            currentMax = 3600;
-            if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
-            automateIntervalometer();
-            currentValue = IntervalometerSettings[whichItem];
+            currentMax = 0;
+            currentValue = F("Duration: ");
+            currentValue += showTotalIntTime();
             break;
         case INT_INITIAL_DELAY:
             currentName = F("Initial Delay: ");
@@ -411,17 +418,8 @@ void menuItem(int whichItem, int action) {
             currentValue = IntervalometerSettings[whichItem];
             if (currentValue == "0") currentValue = F("Off");
             break;
-        case INT_HOLD_SHUTTER:
-            currentName = F("Hold Shutter: ");
-            currentMin = 0;
-            currentMax = 60;
-            if (action != 0) IntervalometerSettings[whichItem] = limitValue(IntervalometerSettings[whichItem] + action);
-            currentValue = IntervalometerSettings[whichItem];
-            if (currentValue == "0") currentValue = F("Off");
-            break;
         default:
-            currentName = "";
-            currentValue = "";
+            settingsSubMenu(action);
         }
         return;
     }
@@ -471,7 +469,7 @@ String decodeItemValue(int value, byte lookupChart) {
     
     switch (lookupChart) {
         case ONOFF_CHART:
-            conversionChart = new String[3]{F("off"), F("on"), F("auto")};
+            conversionChart = new String[3]{F("Off"), F("On"), F("Auto")};
             break;
         case TRIGGER_CHART:
             conversionChart = new String[3]{F("Flash"), F("Shutter"), F("Lockup")};
@@ -485,11 +483,6 @@ String decodeItemValue(int value, byte lookupChart) {
         case INT_PRIORITY_CHART:
             conversionChart = new String[3]{F("Shot Count"), F("Total Time"), F("Time Btwn")};
             break;
-        case TIME_UNIT_CHART:
-            conversionChart = new String[4]{F(" secs"), F(" mins"), F(" hrs"), F(" days")};
-            break;
-        
-        
         default:
             break;
     }
@@ -498,13 +491,50 @@ String decodeItemValue(int value, byte lookupChart) {
     return theText;
 }
 
-void automateIntervalometer() {
-    if (IntervalometerSettings[INT_AUTO] == SHOT_COUNT)
-        IntervalometerSettings[INT_TOTAL_SHOTS] = IntervalometerSettings[INT_TOTAL_TIME] / IntervalometerSettings[INT_SHOOT_EVERY];
-    else if (IntervalometerSettings[INT_AUTO] == TOTAL_TIME)
-        IntervalometerSettings[INT_TOTAL_TIME] = IntervalometerSettings[INT_TOTAL_SHOTS] * IntervalometerSettings[INT_SHOOT_EVERY];
-    else if (IntervalometerSettings[INT_AUTO] == SHOOT_EVERY)
-        IntervalometerSettings[INT_SHOOT_EVERY] = IntervalometerSettings[INT_TOTAL_TIME] / IntervalometerSettings[INT_TOTAL_SHOTS];
+
+long intervalTimeInSecs() {
+    long oneShotTime = IntervalometerSettings[INT_SECS];
+    oneShotTime += 60 * (long)IntervalometerSettings[INT_MINS];
+    oneShotTime += 3600 * (long) IntervalometerSettings[INT_HRS];
+    return oneShotTime;
+}
+
+int maxIntervalShots() {
+    long maxTime = 2592000; // 30 days * 86,400 seconds in a day
+    long maxShots = maxTime / intervalTimeInSecs();
+    if (maxShots > 10000) maxShots = 10000;
+    if (maxShots < 1) maxShots = 1;
+    if (IntervalometerSettings[INT_TOTAL_SHOTS] > maxShots) IntervalometerSettings[INT_TOTAL_SHOTS] = maxShots;
+
+    return (int) maxShots;
+}
+
+String showTotalIntTime() {
+    String result = "";
+    
+    long seconds = intervalTimeInSecs() * (long)IntervalometerSettings[INT_TOTAL_SHOTS];
+    seconds -= intervalTimeInSecs();
+    seconds += (long)IntervalometerSettings[INT_INITIAL_DELAY];
+
+    long hours = seconds / 3600;
+    seconds -= hours*3600;
+
+    long minutes =  seconds / 60;
+    seconds -= minutes * 60;
+
+    if (hours < 10) result+= F("0");
+    result += String(hours);
+    result += F(":");
+    if (minutes < 10) result+= F("0");
+    result += String(minutes);
+    result += F(":");
+    if (seconds < 10) result+= F("0");
+    result += String(seconds);
+
+    return result;
+
+
+
 }
 
 // Print each line starting from currentPage
@@ -539,6 +569,18 @@ void PrintScreen() {
     lcd.setCursor(cursorPosition, (currentItem-currentPage) + 1);
     lcd.blink();
     
+}
+
+void settingsSubMenu(int action) {
+    currentName = F("Settings -> ");
+    currentValue="";
+    currentMin = 0;
+    currentMax = 0;
+    
+    if (action != 0) {
+        previousMenu = currentMenu;
+        changeCurrentMenu(SettingsMenu);
+    }
 }
 
 // Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
@@ -617,7 +659,8 @@ void buttonItemRight(bool holdDown) {
 
 void buttonCancel() {
     if (mode == STANDBY_MODE && currentMenu != MainMenu) {
-        changeCurrentMenu(MainMenu);
+        changeCurrentMenu(previousMenu);
+        previousMenu = MainMenu;
     } else if (mode != STANDBY_MODE) {
         mode = CANCELLING_MODE;
     }

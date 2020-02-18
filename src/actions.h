@@ -5,7 +5,7 @@
 
 
 // Functions - Physical actions
-    void flash(); // Trigger the connected flash
+    void flash(bool override = false); // Trigger the connected flash
     void shutterOpen(bool hold=false); // Trigger the shutter. If @param hold is set true, must use shutterClose() to close shutter
     void shutterClose(); // Close the shutter
     void lockup();

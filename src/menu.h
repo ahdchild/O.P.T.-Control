@@ -63,20 +63,18 @@
     const byte LI_HOLD_SHUTTER = 1;
 
 // Intervalometer Menu
-    const byte INT_MENU_SIZE = 8;
+    const byte INT_MENU_SIZE = 6;
 
     // Settings array
     extern int IntervalometerSettings[];
 
     // index values for settings
-    const byte INT_AUTO = 0;
-    const byte INT_TOTAL_SHOTS = 1;
-    const byte INT_TOTAL_TIME = 2;
-    const byte INT_SHOOT_EVERY = 3;
-    const byte INT_INITIAL_DELAY = 4;
-    const byte INT_HOLD_SHUTTER = 5;
-    const byte INT_TOTAL_TIME_UNITS = 6; // not a seperately visible setting. Toggle with measure
-    const byte INT_SHOOT_EVERY_UNITS = 7; // not a seperately visible setting. Toggle with measure
+    const byte INT_SECS = 0;
+    const byte INT_MINS = 1;
+    const byte INT_HRS = 2;
+    const byte INT_TOTAL_SHOTS = 3;
+    const byte INT_TOTAL_TIME = 4;
+    const byte INT_INITIAL_DELAY = 5;
 
 // Settings Menu
     const byte SET_MENU_SIZE = 3;
@@ -162,10 +160,13 @@
     void menuItem(int whichItem, int action=0);
     void changeCurrentMenu(int whichMenu);
     String decodeItemValue(int value, byte lookupChart);
-    void automateIntervalometer();
+    long intervalTimeInSecs();
+    int maxIntervalShots();
+    String showTotalIntTime();
 
     void PrintScreen(); // clear the screen. Print each line starting from currentPage
     String PrintMenuLine(byte screenLine); // Print a particular menu line to lcd. Use case switch to pull from a const String array then print the relevant variable.
+    void settingsSubMenu(int action = 0);
 
     void buttonMenuDown();
     void buttonMenuUp();
